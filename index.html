@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shopee Affiliate Tracker By HamZayn</title>
+<title>Shopee Affiliate Tracker By @Hamziyadd</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -170,7 +170,7 @@
 <body>
 
 <nav class="nav">
-  <div class="nav-brand"><div class="dot"></div> Shopee Affiliate Tracker By HamZayn</div>
+  <div class="nav-brand"><div class="dot"></div> Shopee Affiliate Tracker by @Hamziyadd</div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('upload',this)">Upload Data</button>
     <button class="nav-tab" onclick="showPage('mapping',this)">Mapping Iklan</button>
@@ -775,33 +775,64 @@ function computeDailyStats(from,to){
 }
 
 // ======================== DASHBOARD ========================
+// Helper: total spend langsung dari rawMeta (tidak tergantung mapping)
+function computeRawTotalSpend(from, to) {
+  let total = 0;
+  rawMeta.forEach(r => {
+    const dt = (r['date_start'] || '').slice(0, 10);
+    if (!inRange(dt, from, to)) return;
+    total += parseFloat(r['spend'] || 0);
+  });
+  return total;
+}
+function computeRawTotalClicks(from, to) {
+  let total = 0;
+  rawMeta.forEach(r => {
+    const dt = (r['date_start'] || '').slice(0, 10);
+    if (!inRange(dt, from, to)) return;
+    total += parseFloat(r['link_clicks'] || 0);
+  });
+  return total;
+}
+
 function renderDashboard(){
   if(!rawMeta.length&&!rawOrders.length)return;
   const{from,to}=getDateRange();
   const ts=computeTagStats(from,to);
   const daily=computeDailyStats(from,to);
   const all=Object.values(ts);
-  const totSpend=all.reduce((s,t)=>s+t.spend,0);
-  const totPPN=all.reduce((s,t)=>s+t.ppnAmount,0);
-  const totCost=all.reduce((s,t)=>s+t.totalCost,0);
+
+  // Spend & clicks: ambil LANGSUNG dari rawMeta (semua campaign, mapped atau tidak)
+  const totSpend=computeRawTotalSpend(from,to);
+  const totMetaClicks=computeRawTotalClicks(from,to);
+  const totPPN=getPpnAmount(totSpend);
+  const totCost=getTotalCost(totSpend);
+
+  // Spend yang belum di-mapping
+  const mappedSpend=all.reduce((s,t)=>s+t.spend,0);
+  const unmappedSpend=totSpend-mappedSpend;
+
   const totKomisi=all.reduce((s,t)=>s+t.komisi,0);
   const totProfit=totKomisi-totCost;
   const totOrders=all.reduce((s,t)=>s+t.orders,0);
   const totShopee=all.reduce((s,t)=>s+t.shopeeClicks,0);
-  const totMeta=all.reduce((s,t)=>s+t.metaClicks,0);
   const roi=totCost>0?(totProfit/totCost*100).toFixed(1):'-';
-  const ctr=totMeta>0?(totShopee/totMeta*100).toFixed(1):'-';
+  const ctr=totMetaClicks>0?(totShopee/totMetaClicks*100).toFixed(1):'-';
   const cvr=totShopee>0?(totOrders/totShopee*100).toFixed(1):'-';
 
+  const spendSub=unmappedSpend>1000
+    ?`sebelum PPN · ⚠️ Rp ${fmt(Math.round(unmappedSpend))} belum mapping`
+    :'sebelum PPN (semua campaign)';
+
   document.getElementById('dash-metrics').innerHTML=
-    M('Total Spend','Rp '+fmt(totSpend),'sebelum PPN','blue')+
-    M('PPN ('+ppnRate+'%)','Rp '+fmt(totPPN),'biaya pajak','yellow')+
-    M('Total Biaya','Rp '+fmt(totCost),'spend + PPN','red')+
-    M('Klik Meta',fmt(totMeta),'unique link clicks','')+
+    M('Total Spend','Rp '+fmt(Math.round(totSpend)),spendSub,'blue')+
+    M('PPN ('+ppnRate+'%)','Rp '+fmt(Math.round(totPPN)),'biaya pajak','yellow')+
+    M('Total Biaya','Rp '+fmt(Math.round(totCost)),'spend + PPN','red')+
+    M('Klik Meta',fmt(totMetaClicks),'unique link clicks','')+
     M('Klik Shopee',fmt(totShopee),'Click-thru: '+ctr+'%','')+
     M('CVR Shopee',cvr+'%',fmt(totOrders)+' order','purple')+
-    M('Total Komisi','Rp '+fmt(totKomisi),'incl. pending','')+
-    M('Net Profit','Rp '+fmt(totProfit),'ROI: '+roi+'%',totProfit>=0?'green':'red');
+    M('Total Komisi','Rp '+fmt(Math.round(totKomisi)),'incl. pending','')+
+    M('Net Profit','Rp '+fmt(Math.round(totProfit)),'ROI: '+roi+'%',totProfit>=0?'green':'red');
 
   renderDailyChart(daily);renderProfitChart(daily);renderDashTable(ts);
 }
