@@ -373,7 +373,7 @@ tr:hover td{background:#fafafa;}
       <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Rincian Harian</div>
       <div class="modal-table-wrap">
         <table><thead><tr>
-          <th>Tanggal</th><th>Spend</th><th>PPN</th><th>Total Biaya</th>
+          <th>Tanggal</th><th>Spend</th><th>PPN</th><th>Total Biaya</th><th>CPR</th>
           <th>Klik Meta</th><th>Klik Shopee</th><th>CTR%</th>
           <th>Order</th><th>CVR</th><th>Komisi</th><th>ROAS</th><th>Profit</th><th>ROI</th><th>Status</th>
         </tr></thead><tbody id="modal-table-body"></tbody></table>
@@ -902,22 +902,24 @@ function renderModal(){
   const rows=[];
   allDates.forEach(dt=>{
     if(!inRange(dt,from,to))return;
-    let spend=0,mc=0;
-    camps.forEach(c=>rawMeta.filter(r=>r['campaign_name']===c&&(r['date_start']||'').slice(0,10)===dt).forEach(r=>{spend+=parseFloat(r['spend']||0);mc+=parseFloat(r['link_clicks']||0);}));
+    let spend=0,mc=0,results=0;
+    camps.forEach(c=>rawMeta.filter(r=>r['campaign_name']===c&&(r['date_start']||'').slice(0,10)===dt).forEach(r=>{spend+=parseFloat(r['spend']||0);mc+=parseFloat(r['link_clicks']||0);results+=parseFloat(r['results']||0);}));
     let orders=0,komisi=0,sc=0;
     rawOrders.filter(r=>(r['Tag_link1']||'').trim()===tag&&(r['Waktu Pemesanan']||'').slice(0,10)===dt&&r['Status Pesanan']!=='Dibatalkan').forEach(r=>{orders++;komisi+=parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);});
     rawClicks.filter(r=>extractBaseTag(r['Tag_link']||'')===tag&&(r['Waktu Klik']||'').slice(0,10)===dt).forEach(()=>sc++);
     if(!spend&&!komisi&&!sc)return;
     const ppnA=getPpnAmount(spend),tc=getTotalCost(spend),profit=komisi-tc;
-    rows.push({dt,spend,ppnA,tc,mc,sc,orders,komisi,profit,roas:tc>0?komisi/tc:null,roi:tc>0?profit/tc*100:null,cvr:sc>0?orders/sc*100:null,ctr:mc>0?sc/mc*100:null});
+    rows.push({dt,spend,ppnA,tc,mc,sc,orders,komisi,profit,results,cpr:results>0?spend/results:null,roas:tc>0?komisi/tc:null,roi:tc>0?profit/tc*100:null,cvr:sc>0?orders/sc*100:null,ctr:mc>0?sc/mc*100:null});
   });
   const tS=rows.reduce((s,r)=>s+r.spend,0),tC=rows.reduce((s,r)=>s+r.tc,0);
   const tK=rows.reduce((s,r)=>s+r.komisi,0),tP=tK-tC,tO=rows.reduce((s,r)=>s+r.orders,0);
   const tSh=rows.reduce((s,r)=>s+r.sc,0),tM=rows.reduce((s,r)=>s+r.mc,0);
+  const tR=rows.reduce((s,r)=>s+r.results,0),tCPR=tR>0?tS/tR:null;
   const roas=tC>0?tK/tC:null;
   document.getElementById('modal-metrics').innerHTML=
     M('Spend','Rp '+fmt(tS),'sebelum PPN','blue')+
     M('Total Biaya','Rp '+fmt(tC),'incl PPN '+ppnRate+'%','red')+
+    M('CPR','Rp '+fmt(tCPR||0),tR>0?fmt(tR)+' results':'','yellow')+
     M('Klik Meta',fmt(tM),'CTR: '+(tM>0?(tSh/tM*100).toFixed(1):'-')+'%','')+
     M('Klik Shopee',fmt(tSh),'','')+
     M('Order',fmt(tO),'CVR: '+(tSh>0?(tO/tSh*100).toFixed(1):'-')+'%','purple')+
@@ -938,6 +940,7 @@ function renderModal(){
       <td style="white-space:nowrap;font-weight:500">${r.dt}</td>
       <td>${fmt(r.spend)}</td><td style="color:var(--yellow)">${ppnRate>0?fmt(r.ppnA):'-'}</td>
       <td style="font-weight:600">${fmt(r.tc)}</td>
+      <td style="color:var(--text2)">${r.cpr!==null?'Rp '+fmt(r.cpr):'-'}</td>
       <td>${fmt(r.mc)}</td><td>${fmt(r.sc)}</td><td>${ctrB(r.ctr)}</td>
       <td>${fmt(r.orders)}</td><td>${cvrB(r.cvr)}</td>
       <td>${fmt(r.komisi)}</td>${roasCell(r.roas)}
@@ -945,7 +948,7 @@ function renderModal(){
       <td>${r.roi!==null?r.roi.toFixed(1)+'%':'-'}</td>
       <td>${statusB(r.profit,r.tc)}</td>
     </tr>`;
-  }).join('')||'<tr><td colspan="14" style="text-align:center;color:var(--text3);padding:20px">Tidak ada data pada periode ini</td></tr>';
+  }).join('')||'<tr><td colspan="15" style="text-align:center;color:var(--text3);padding:20px">Tidak ada data pada periode ini</td></tr>';
 }
 
 // Modal event listeners — clean, no conflicts
