@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopee Affiliate Tracker By HamZayn</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:#f5f5f5;--card:#fff;--border:#e5e7eb;
+    --text:#111827;--text2:#6b7280;--text3:#9ca3af;
+    --blue:#1d4ed8;--blue-light:#eff6ff;
+    --green:#15803d;--green-light:#f0fdf4;
+    --red:#dc2626;--red-light:#fef2f2;
+    --yellow:#d97706;--yellow-light:#fffbeb;
+    --accent:#6366f1;--purple-light:#ede9fe;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;}
+
+  /* NAV */
+  .nav{background:#1e1e2e;color:#fff;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:200;gap:12px;flex-wrap:wrap;}
+  .nav-brand{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;white-space:nowrap;}
+  .nav-brand .dot{width:8px;height:8px;border-radius:50%;background:#a78bfa;flex-shrink:0;}
+  .nav-tabs{display:flex;gap:2px;flex-wrap:wrap;}
+  .nav-tab{padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;color:#9ca3af;transition:all .15s;border:none;background:none;white-space:nowrap;}
+  .nav-tab.active,.nav-tab:hover{background:rgba(255,255,255,.1);color:#fff;}
+
+  /* PPN BAR */
+  .ppn-bar{background:#161625;border-bottom:1px solid rgba(255,255,255,.07);padding:7px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .ppn-bar label{font-size:12px;color:#9ca3af;white-space:nowrap;}
+  .ppn-bar input[type=number]{width:64px;padding:4px 8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:6px;color:#fff;font-size:13px;}
+  .ppn-bar input[type=number]:focus{outline:none;border-color:#a78bfa;}
+  .ppn-presets{display:flex;gap:4px;}
+  .ppn-preset{padding:3px 8px;border-radius:5px;border:1px solid rgba(255,255,255,.13);background:none;color:#9ca3af;font-size:11px;cursor:pointer;transition:all .15s;}
+  .ppn-preset:hover,.ppn-preset.active{background:rgba(167,139,250,.18);color:#a78bfa;border-color:#a78bfa;}
+  .ppn-indicator{font-size:12px;color:#a78bfa;font-weight:500;}
+
+  /* PAGES */
+  .page{display:none;padding:24px;max-width:1400px;margin:0 auto;}
+  .page.active{display:block;}
+
+  /* UPLOAD */
+  .upload-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:20px;}
+  .upload-card{background:var(--card);border:2px dashed var(--border);border-radius:12px;padding:24px;text-align:center;transition:all .2s;cursor:pointer;}
+  .upload-card.loaded{border-color:#22c55e;background:#f0fdf4;border-style:solid;}
+  .upload-card.error{border-color:#ef4444;background:#fef2f2;border-style:solid;}
+  .upload-card h3{font-size:14px;font-weight:600;margin-bottom:4px;}
+  .upload-card p{font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.5;}
+  .upload-card .icon{font-size:30px;margin-bottom:10px;}
+  .upload-card .status{font-size:12px;font-weight:500;margin-top:8px;}
+  .upload-card.loaded .status{color:#15803d;}
+  .upload-card.error .status{color:#dc2626;}
+  input[type=file]{display:none;}
+
+  /* BUTTONS */
+  .btn{padding:7px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;}
+  .btn:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .btn-primary:hover{background:#4f46e5;color:#fff;}
+  .btn-sm{padding:4px 10px;font-size:12px;border-radius:6px;}
+  .btn-ghost{background:none;border-color:transparent;color:var(--text2);}
+  .btn-ghost:hover{background:#f3f4f6;border-color:var(--border);color:var(--text);}
+
+  /* LAYOUT */
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
+  .section-title{font-size:16px;font-weight:600;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;}
+
+  /* METRICS */
+  .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px;}
+  .metric{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;}
+  .metric .label{font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+  .metric .value{font-size:20px;font-weight:700;color:var(--text);line-height:1.2;}
+  .metric .sub{font-size:11px;color:var(--text2);margin-top:3px;}
+  .metric.green{background:var(--green-light);border-color:#bbf7d0;}.metric.green .value{color:var(--green);}
+  .metric.red{background:var(--red-light);border-color:#fecaca;}.metric.red .value{color:var(--red);}
+  .metric.blue{background:var(--blue-light);border-color:#bfdbfe;}.metric.blue .value{color:var(--blue);}
+  .metric.purple{background:var(--purple-light);border-color:#c4b5fd;}.metric.purple .value{color:#5b21b6;}
+  .metric.yellow{background:var(--yellow-light);border-color:#fde68a;}.metric.yellow .value{color:var(--yellow);}
+
+  /* FILTERS */
+  .filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .filter-bar label{font-size:12px;font-weight:500;color:var(--text2);}
+  .filter-bar select,.filter-bar input[type=date]{padding:5px 9px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-size:13px;}
+  .date-presets{display:flex;gap:3px;}
+  .date-preset{padding:4px 9px;border:1px solid var(--border);border-radius:6px;background:var(--card);cursor:pointer;font-size:12px;color:var(--text2);transition:all .15s;}
+  .date-preset.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+  /* TABLE */
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  th{text-align:left;padding:9px 10px;border-bottom:2px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);white-space:nowrap;}
+  td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:#fafafa;}
+  .badge{display:inline-block;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:.2px;}
+  .badge-profit{background:#dcfce7;color:#15803d;}
+  .badge-loss{background:#fee2e2;color:#dc2626;}
+  .badge-break{background:#fef9c3;color:#a16207;}
+  .badge-pending{background:#f3f4f6;color:#6b7280;}
+  .cvr-high{color:#15803d;font-weight:600;}
+  .cvr-mid{color:var(--yellow);font-weight:600;}
+  .cvr-low{color:#dc2626;font-weight:600;}
+
+  /* ============================================================
+     SEARCHABLE MULTI-SELECT DROPDOWN
+     ============================================================ */
+  .ms-wrap{position:relative;flex:1;min-width:0;}
+  /* The "trigger" box that shows selected items */
+  .ms-trigger{
+    display:flex;align-items:center;flex-wrap:wrap;gap:4px;
+    min-height:34px;padding:4px 28px 4px 8px;
+    border:1px solid var(--border);border-radius:8px;
+    background:var(--card);cursor:pointer;position:relative;
+    transition:border-color .15s;
+  }
+  .ms-trigger:hover{border-color:#a5b4fc;}
+  .ms-trigger.open{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.1);}
+  .ms-trigger .ms-placeholder{font-size:12px;color:var(--text3);}
+  .ms-trigger .ms-chip{display:inline-flex;align-items:center;gap:3px;background:#ede9fe;color:#5b21b6;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:500;white-space:nowrap;}
+  .ms-trigger .ms-chip .ms-chip-x{cursor:pointer;font-size:10px;opacity:.6;margin-left:1px;flex-shrink:0;}
+  .ms-trigger .ms-chip .ms-chip-x:hover{opacity:1;}
+  .ms-caret{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:10px;pointer-events:none;}
+  /* Dropdown panel */
+  .ms-panel{
+    display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;
+    background:var(--card);border:1px solid var(--border);border-radius:10px;
+    z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.12);overflow:hidden;
+    min-width:240px;
+  }
+  .ms-panel.open{display:block;}
+  .ms-search-wrap{padding:8px 10px;border-bottom:1px solid var(--border);}
+  .ms-search{width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-size:12px;background:#f9fafb;color:var(--text);outline:none;}
+  .ms-search:focus{border-color:var(--accent);background:#fff;}
+  .ms-options{max-height:220px;overflow-y:auto;}
+  .ms-option{display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;font-size:12px;transition:background .1s;}
+  .ms-option:hover{background:#f5f3ff;}
+  .ms-option.selected{background:#f0effe;}
+  .ms-option input[type=checkbox]{accent-color:var(--accent);flex-shrink:0;}
+  .ms-option-label{flex:1;line-height:1.3;}
+  .ms-empty{padding:14px 12px;font-size:12px;color:var(--text3);text-align:center;}
+  .ms-footer{padding:7px 10px;border-top:1px solid var(--border);display:flex;gap:6px;justify-content:flex-end;}
+
+  /* MAPPING */
+  .mapping-container{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  @media(max-width:768px){.mapping-container{grid-template-columns:1fr;}}
+  .mapping-list{max-height:560px;overflow-y:auto;padding-right:4px;}
+  .mapping-item{display:flex;align-items:flex-start;gap:8px;padding:10px 0;border-bottom:1px solid var(--border);}
+  .mapping-item:last-child{border-bottom:none;}
+  .tag-badge{display:inline-block;padding:3px 9px;background:#ede9fe;color:#5b21b6;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap;margin-top:6px;}
+  .arrow{color:var(--text3);font-size:13px;flex-shrink:0;margin-top:9px;}
+
+  /* CHART */
+  .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+  @media(max-width:900px){.chart-grid{grid-template-columns:1fr;}}
+  .chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;}
+  .chart-card h3{font-size:13px;font-weight:600;margin-bottom:14px;color:var(--text2);}
+  .chart-wrap{position:relative;height:210px;}
+
+  /* MISC */
+  .info-box{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;margin-bottom:18px;font-size:13px;color:#1e40af;line-height:1.6;}
+  .warn-box{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;margin-bottom:18px;font-size:13px;color:#92400e;line-height:1.6;}
+  .search-input{padding:6px 11px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--card);color:var(--text);}
+  .tag-search-wrap{position:relative;margin-bottom:12px;}
+  .tag-search-wrap input{width:100%;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand"><div class="dot"></div> Shopee Affiliate Tracker By HamZayn</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('upload',this)">Upload Data</button>
+    <button class="nav-tab" onclick="showPage('mapping',this)">Mapping Iklan</button>
+    <button class="nav-tab" onclick="showPage('dashboard',this)">Dashboard</button>
+    <button class="nav-tab" onclick="showPage('detail',this)">Detail Iklan</button>
+    <button class="nav-tab" onclick="showPage('tags',this)">Tag Shopee</button>
+  </div>
+</nav>
+
+<!-- PPN BAR -->
+<div class="ppn-bar">
+  <label>PPN Iklan Meta:</label>
+  <input type="number" id="ppn-input" value="11" min="0" max="100" step="0.5" oninput="onPpnChange()">
+  <span style="color:#6b7280;font-size:12px">%</span>
+  <div class="ppn-presets">
+    <button class="ppn-preset" onclick="setPpn(0)">0%</button>
+    <button class="ppn-preset" onclick="setPpn(4)">4%</button>
+    <button class="ppn-preset" onclick="setPpn(5)">5%</button>
+    <button class="ppn-preset active" onclick="setPpn(11)">11%</button>
+    <button class="ppn-preset" onclick="setPpn(12)">12%</button>
+  </div>
+  <span class="ppn-indicator" id="ppn-indicator">PPN 11% aktif → Total cost = Spend × 1.11</span>
+</div>
+
+<!-- ========== UPLOAD ========== -->
+<div id="page-upload" class="page active">
+  <div class="section-header" style="margin-bottom:18px">
+    <div>
+      <div class="section-title">Upload Laporan CSV</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:2px">Upload 3 file laporan dari Meta Ads dan Shopee Affiliate</div>
+    </div>
+  </div>
+  <div class="upload-grid">
+    <div class="upload-card" id="card-meta" onclick="document.getElementById('file-meta').click()">
+      <div class="icon">📊</div><h3>Meta Ads Report</h3>
+      <p>File CSV kampanye dari Meta Ads Manager<br><small>Kolom: Campaign name, Amount spent (IDR), Unique link clicks, Impressions, Reporting starts/ends</small></p>
+      <button class="btn btn-sm">Pilih File</button>
+      <input type="file" id="file-meta" accept=".csv" onchange="loadMeta(this)">
+      <div class="status" id="status-meta">Belum diupload</div>
+    </div>
+    <div class="upload-card" id="card-orders" onclick="document.getElementById('file-orders').click()">
+      <div class="icon">🛍️</div><h3>Shopee Komisi (Pesanan)</h3>
+      <p>File CSV laporan komisi affiliate Shopee<br><small>Kolom: Tag_link1, Komisi Bersih Affiliate (Rp), Status Pesanan, Waktu Pemesanan</small></p>
+      <button class="btn btn-sm">Pilih File</button>
+      <input type="file" id="file-orders" accept=".csv" onchange="loadOrders(this)">
+      <div class="status" id="status-orders">Belum diupload</div>
+    </div>
+    <div class="upload-card" id="card-clicks" onclick="document.getElementById('file-clicks').click()">
+      <div class="icon">👆</div><h3>Shopee Klik Website</h3>
+      <p>File CSV laporan klik website Shopee Affiliate<br><small>Kolom: Tag_link, Waktu Klik, Wilayah Klik, Perujuk</small></p>
+      <button class="btn btn-sm">Pilih File</button>
+      <input type="file" id="file-clicks" accept=".csv" onchange="loadClicks(this)">
+      <div class="status" id="status-clicks">Belum diupload</div>
+    </div>
+  </div>
+  <div id="upload-ready-box" style="display:none" class="info-box">
+    ✅ Semua file berhasil diupload! Pergi ke <strong>Mapping Iklan</strong> untuk menghubungkan Tag Shopee dengan kampanye Meta Ads.
+  </div>
+  <div class="card">
+    <h3 style="font-size:13px;font-weight:600;margin-bottom:12px">Keterangan Kolom CSV</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;font-size:12px;">
+      <div><div style="font-weight:600;margin-bottom:6px;color:var(--accent)">Meta Ads</div><div style="color:var(--text2);line-height:1.9">• Campaign name<br>• Amount spent (IDR)<br>• Unique link clicks<br>• Impressions, Reach<br>• Reporting starts/ends</div></div>
+      <div><div style="font-weight:600;margin-bottom:6px;color:var(--accent)">Shopee Komisi</div><div style="color:var(--text2);line-height:1.9">• Tag_link1<br>• Komisi Bersih Affiliate (Rp)<br>• Status Pesanan<br>• Waktu Pemesanan<br>• Nilai Pembelian (Rp)</div></div>
+      <div><div style="font-weight:600;margin-bottom:6px;color:var(--accent)">Shopee Klik</div><div style="color:var(--text2);line-height:1.9">• Tag_link<br>• Waktu Klik<br>• Wilayah Klik<br>• Perujuk</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MAPPING ========== -->
+<div id="page-mapping" class="page">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Mapping Tag Shopee → Kampanye Meta Ads</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:2px">Satu tag bisa di-assign ke banyak kampanye dan sebaliknya. Gunakan kotak pencarian untuk menemukan kampanye dengan cepat.</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-sm" onclick="doAutoMapping()">⚡ Auto-Map</button>
+      <button class="btn btn-sm" onclick="clearAllMapping()">🗑 Hapus Semua</button>
+      <button class="btn btn-primary btn-sm" onclick="saveMapping()">💾 Simpan</button>
+    </div>
+  </div>
+  <div class="info-box" id="mapping-info">Upload semua file CSV terlebih dahulu di tab Upload Data.</div>
+  <div class="warn-box" id="mapping-warn" style="display:none">
+    ⚠️ <strong>Auto-Map tidak aktif otomatis.</strong> Klik <strong>⚡ Auto-Map</strong> untuk mencoba mapping otomatis berdasarkan kesamaan nama, atau lakukan mapping manual di bawah ini.
+  </div>
+  <div class="mapping-container" id="mapping-body" style="display:none">
+    <div class="card">
+      <h3 style="font-size:13px;font-weight:600;margin-bottom:4px">Tag Shopee</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Cari tag, lalu pilih kampanye Meta yang sesuai. Dropdown bisa dicari/diketik.</p>
+      <div class="tag-search-wrap">
+        <input class="search-input" style="width:100%" placeholder="🔍 Cari tag Shopee..." id="search-tags" oninput="renderMappingList()">
+      </div>
+      <div class="mapping-list" id="mapping-list"></div>
+    </div>
+    <div class="card">
+      <h3 style="font-size:13px;font-weight:600;margin-bottom:4px">Ringkasan Mapping</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Preview mapping aktif.</p>
+      <div id="mapping-summary"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== DASHBOARD ========== -->
+<div id="page-dashboard" class="page">
+  <div class="section-header">
+    <div class="section-title">Dashboard Overview</div>
+    <div class="filter-bar" style="margin-bottom:0">
+      <label>Tanggal:</label>
+      <div class="date-presets">
+        <button class="date-preset active" onclick="setPreset('all',this)">Semua</button>
+        <button class="date-preset" onclick="setPreset('today',this)">Hari ini</button>
+        <button class="date-preset" onclick="setPreset('7d',this)">7 Hari</button>
+      </div>
+      <input type="date" id="date-from" onchange="applyDateFilter()">
+      <span style="color:var(--text2)">–</span>
+      <input type="date" id="date-to" onchange="applyDateFilter()">
+    </div>
+  </div>
+  <div id="dash-content">
+    <div class="metric-grid" id="dash-metrics"></div>
+    <div class="chart-grid">
+      <div class="chart-card"><h3>Spend + PPN vs Komisi per Hari</h3><div class="chart-wrap"><canvas id="chart-daily"></canvas></div></div>
+      <div class="chart-card"><h3>Net Profit per Hari (setelah PPN)</h3><div class="chart-wrap"><canvas id="chart-profit"></canvas></div></div>
+    </div>
+    <div class="card">
+      <div class="section-header" style="margin-bottom:12px">
+        <h3 style="font-size:13px;font-weight:600">Performa per Tag / Kampanye</h3>
+        <select id="sort-dash" onchange="renderDashTable()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px">
+          <option value="profit">Urutkan: Profit</option>
+          <option value="spend">Urutkan: Spend</option>
+          <option value="komisi">Urutkan: Komisi</option>
+          <option value="roi">Urutkan: ROI</option>
+          <option value="cvr">Urutkan: CVR</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr>
+          <th>Tag Shopee</th><th>Kampanye Meta</th><th>Spend (Rp)</th><th>PPN</th><th>Total Biaya</th>
+          <th>Klik Meta</th><th>Klik Shopee</th><th>Click-thru%</th>
+          <th>Order</th><th>CVR</th><th>Komisi (Rp)</th><th>Profit (Rp)</th><th>ROI</th><th>Status</th>
+        </tr></thead><tbody id="dash-table-body"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== DETAIL ========== -->
+<div id="page-detail" class="page">
+  <div class="section-header">
+    <div class="section-title">Detail per Kampanye / Per Hari</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <select id="detail-campaign" onchange="renderDetailPage()" style="padding:5px 9px;border:1px solid var(--border);border-radius:8px;font-size:13px;max-width:280px">
+        <option value="">Semua Kampanye</option>
+      </select>
+      <input type="date" id="detail-from" onchange="renderDetailPage()">
+      <span style="color:var(--text2)">–</span>
+      <input type="date" id="detail-to" onchange="renderDetailPage()">
+    </div>
+  </div>
+  <div class="metric-grid" id="detail-metrics"></div>
+  <div class="card">
+    <h3 style="font-size:13px;font-weight:600;margin-bottom:14px">Breakdown Harian</h3>
+    <div class="table-wrap">
+      <table><thead><tr>
+        <th>Tanggal</th><th>Kampanye</th><th>Tag</th>
+        <th>Spend</th><th>PPN</th><th>Total Biaya</th>
+        <th>Klik Meta</th><th>Klik Shopee</th><th>Click-thru%</th>
+        <th>Order</th><th>CVR</th><th>Komisi</th><th>Profit</th><th>ROI</th><th>Status</th>
+      </tr></thead><tbody id="detail-table-body"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ========== TAGS ========== -->
+<div id="page-tags" class="page">
+  <div class="section-header">
+    <div class="section-title">Analisis Tag Shopee</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="date" id="tags-from" onchange="renderTagsPage()">
+      <span style="color:var(--text2)">–</span>
+      <input type="date" id="tags-to" onchange="renderTagsPage()">
+    </div>
+  </div>
+  <div class="metric-grid" id="tags-metrics"></div>
+  <div class="chart-grid" style="margin-bottom:18px">
+    <div class="chart-card"><h3>Top 10 Tag by Komisi</h3><div class="chart-wrap"><canvas id="chart-tag-komisi"></canvas></div></div>
+    <div class="chart-card"><h3>Top 10 Tag by CVR (Shopee Klik → Order)</h3><div class="chart-wrap"><canvas id="chart-tag-cvr"></canvas></div></div>
+  </div>
+  <div class="card">
+    <h3 style="font-size:13px;font-weight:600;margin-bottom:14px">Semua Tag</h3>
+    <div class="table-wrap">
+      <table><thead><tr>
+        <th>Tag</th><th>Klik Meta</th><th>Klik Shopee</th><th>Click-thru%</th>
+        <th>Order</th><th>CVR</th><th>Komisi (Rp)</th><th>Total Biaya (Rp)</th><th>Profit (Rp)</th><th>ROI</th><th>Status</th>
+      </tr></thead><tbody id="tags-table-body"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ======================== STATE ========================
+let rawMeta=[], rawOrders=[], rawClicks=[];
+let mapping={};   // { tag: [campaign,...] }
+let ppnRate=11;
+let chartDaily=null,chartProfit=null,chartTagKomisi=null,chartTagCvr=null;
+
+// ======================== PPN ========================
+function getPpnAmount(s){return s*(ppnRate/100);}
+function getTotalCost(s){return s*(1+ppnRate/100);}
+function setPpn(v){ppnRate=v;document.getElementById('ppn-input').value=v;updatePpnUi();}
+function onPpnChange(){ppnRate=parseFloat(document.getElementById('ppn-input').value)||0;updatePpnUi();}
+function updatePpnUi(){
+  document.getElementById('ppn-indicator').textContent=ppnRate===0?'PPN 0% — Total cost = Spend':`PPN ${ppnRate}% aktif → Total cost = Spend × ${(1+ppnRate/100).toFixed(2)}`;
+  document.querySelectorAll('.ppn-preset').forEach(b=>b.classList.toggle('active',parseFloat(b.textContent)===ppnRate));
+  rerenderAll();
+}
+function rerenderAll(){
+  const a=document.querySelector('.page.active');if(!a)return;
+  const id=a.id.replace('page-','');
+  if(id==='dashboard')renderDashboard();
+  if(id==='detail')renderDetailPage();
+  if(id==='tags')renderTagsPage();
+}
+
+// ======================== NAV ========================
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(id==='mapping')renderMappingPage();
+  if(id==='dashboard')renderDashboard();
+  if(id==='detail')renderDetailPage();
+  if(id==='tags')renderTagsPage();
+}
+
+// ======================== UPLOAD ========================
+function loadMeta(input){
+  const f=input.files[0];if(!f)return;
+  Papa.parse(f,{header:true,skipEmptyLines:true,complete:r=>{
+    rawMeta=r.data.filter(row=>row['Campaign name']?.trim());
+    setCard('meta',`✓ ${rawMeta.length} baris dimuat`,true);checkLoaded();
+  },error:()=>setCard('meta','✗ Gagal membaca file',false)});
+}
+function loadOrders(input){
+  const f=input.files[0];if(!f)return;
+  Papa.parse(f,{header:true,skipEmptyLines:true,complete:r=>{
+    rawOrders=r.data;setCard('orders',`✓ ${rawOrders.length} baris dimuat`,true);checkLoaded();
+  },error:()=>setCard('orders','✗ Gagal membaca file',false)});
+}
+function loadClicks(input){
+  const f=input.files[0];if(!f)return;
+  Papa.parse(f,{header:true,skipEmptyLines:true,complete:r=>{
+    rawClicks=r.data;setCard('clicks',`✓ ${rawClicks.length} baris dimuat`,true);checkLoaded();
+  },error:()=>setCard('clicks','✗ Gagal membaca file',false)});
+}
+function setCard(id,msg,ok){
+  const c=document.getElementById('card-'+id);
+  c.classList.remove('loaded','error');c.classList.add(ok?'loaded':'error');
+  document.getElementById('status-'+id).textContent=msg;
+}
+function checkLoaded(){
+  const ready=rawMeta.length&&rawOrders.length&&rawClicks.length;
+  document.getElementById('upload-ready-box').style.display=ready?'block':'none';
+  // ← NO auto-mapping here intentionally
+}
+
+// ======================== MAPPING DATA ========================
+function getUniqueTags(){
+  const s=new Set();
+  rawOrders.forEach(r=>{const t=(r['Tag_link1']||'').trim();if(t&&t!=='Ada')s.add(t);});
+  return[...s].sort();
+}
+function getUniqueCampaigns(){
+  return[...new Set(rawMeta.map(r=>r['Campaign name']).filter(Boolean))].sort();
+}
+function extractBaseTag(raw){
+  if(!raw)return'';
+  return raw.replace(/[-–]+$/,'').replace(/-[Ff]acebook.*$/i,'').replace(/[-–]+$/,'').trim();
+}
+function doAutoMapping(){
+  const tags=getUniqueTags(),camps=getUniqueCampaigns();
+  tags.forEach(tag=>{
+    const tc=tag.toLowerCase().replace(/[^a-z0-9]/g,'');
+    const matched=camps.filter(c=>{const cc=c.toLowerCase().replace(/[^a-z0-9]/g,'');return cc.includes(tc)||tc.includes(cc.slice(0,6));});
+    mapping[tag]=matched;
+  });
+  renderMappingList();renderMappingSummary();
+  alert(`Auto-map selesai! ${Object.values(mapping).filter(v=>v.length).length}/${tags.length} tag berhasil di-mapping. Periksa hasilnya dan sesuaikan jika perlu.`);
+}
+function clearAllMapping(){
+  if(!confirm('Hapus semua mapping?'))return;
+  getUniqueTags().forEach(t=>mapping[t]=[]);
+  renderMappingList();renderMappingSummary();
+}
+
+// ======================== MAPPING UI ========================
+function renderMappingPage(){
+  if(!rawMeta.length||!rawOrders.length){
+    document.getElementById('mapping-info').textContent='Upload semua file CSV terlebih dahulu di tab Upload Data.';
+    document.getElementById('mapping-body').style.display='none';
+    document.getElementById('mapping-warn').style.display='none';
+    return;
+  }
+  document.getElementById('mapping-info').style.display='none';
+  document.getElementById('mapping-warn').style.display='block';
+  document.getElementById('mapping-body').style.display='grid';
+  // init empty mapping for new tags
+  getUniqueTags().forEach(t=>{if(!mapping[t])mapping[t]=[];});
+  renderMappingList();
+  renderMappingSummary();
+}
+
+function renderMappingList(){
+  const tags=getUniqueTags();
+  const search=(document.getElementById('search-tags')?.value||'').toLowerCase();
+  const filtered=tags.filter(t=>t.toLowerCase().includes(search));
+  const campaigns=getUniqueCampaigns();
+
+  document.getElementById('mapping-list').innerHTML=filtered.map(tag=>{
+    const sid=safeId(tag);
+    return`<div class="mapping-item" id="mitem-${sid}">
+      <span class="tag-badge">${esc(tag)}</span>
+      <span class="arrow">→</span>
+      <div class="ms-wrap" id="mswrap-${sid}"></div>
+    </div>`;
+  }).join('');
+
+  // Mount a searchable dropdown for each tag
+  filtered.forEach(tag=>{
+    const sid=safeId(tag);
+    const wrap=document.getElementById('mswrap-'+sid);
+    if(wrap) mountSearchableMultiSelect(wrap,tag,campaigns,mapping[tag]||[]);
+  });
+}
+
+// ======================== SEARCHABLE MULTI-SELECT ========================
+function mountSearchableMultiSelect(container, tag, allOptions, selectedValues){
+  const sid=safeId(tag);
+  let selected=[...selectedValues];
+  let panelOpen=false;
+
+  function render(){
+    const chips=selected.map(s=>`<span class="ms-chip">${esc(s)}<span class="ms-chip-x" data-val="${esc(s)}">✕</span></span>`).join('');
+    container.innerHTML=`
+      <div class="ms-trigger ${panelOpen?'open':''}" id="mst-${sid}">
+        ${selected.length?chips:'<span class="ms-placeholder">Pilih kampanye...</span>'}
+        <span class="ms-caret">▼</span>
+      </div>
+      <div class="ms-panel ${panelOpen?'open':''}" id="msp-${sid}">
+        <div class="ms-search-wrap">
+          <input class="ms-search" id="msq-${sid}" placeholder="🔍 Ketik nama kampanye..." autocomplete="off">
+        </div>
+        <div class="ms-options" id="msopt-${sid}"></div>
+        <div class="ms-footer">
+          <button class="btn btn-ghost btn-sm" onclick="msClear('${sid}','${esc2(tag)}')">Hapus semua</button>
+          <button class="btn btn-primary btn-sm" onclick="msClose('${sid}')">Selesai</button>
+        </div>
+      </div>`;
+
+    renderOptions(sid,allOptions,selected,'');
+
+    // Trigger click
+    document.getElementById('mst-'+sid).addEventListener('click',e=>{
+      if(e.target.classList.contains('ms-chip-x')){
+        const val=e.target.getAttribute('data-val');
+        selected=selected.filter(s=>s!==val);
+        syncMapping(tag,selected);render();return;
+      }
+      panelOpen=!panelOpen;render();
+      if(panelOpen)setTimeout(()=>{const q=document.getElementById('msq-'+sid);if(q)q.focus();},30);
+    });
+
+    // Search input
+    const qEl=document.getElementById('msq-'+sid);
+    if(qEl) qEl.addEventListener('input',()=>{renderOptions(sid,allOptions,selected,qEl.value);});
+    if(qEl) qEl.addEventListener('keydown',e=>{if(e.key==='Escape'){panelOpen=false;render();}});
+  }
+
+  function renderOptions(sid,options,sel,query){
+    const q=query.toLowerCase();
+    const filtered=q?options.filter(o=>o.toLowerCase().includes(q)):options;
+    const el=document.getElementById('msopt-'+sid);
+    if(!el)return;
+    if(!filtered.length){el.innerHTML='<div class="ms-empty">Tidak ada hasil untuk "'+esc(query)+'"</div>';return;}
+    el.innerHTML=filtered.map(o=>{
+      const isSel=sel.includes(o);
+      return`<div class="ms-option ${isSel?'selected':''}" onclick="msToggle('${sid}','${esc2(o)}','${esc2(tag)}')">
+        <input type="checkbox" ${isSel?'checked':''} onclick="event.stopPropagation();msToggle('${sid}','${esc2(o)}','${esc2(tag)}')">
+        <span class="ms-option-label">${esc(o)}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Store refs for external toggle calls
+  container._msState={selected,tag,allOptions,render,renderOptions};
+  window['_ms_'+sid]=container._msState;
+
+  render();
+}
+
+function msToggle(sid,escapedVal,escapedTag){
+  const state=window['_ms_'+sid];if(!state)return;
+  const val=unesc2(escapedVal),tag=unesc2(escapedTag);
+  if(state.selected.includes(val)) state.selected=state.selected.filter(s=>s!==val);
+  else state.selected.push(val);
+  syncMapping(tag,state.selected);
+  const q=document.getElementById('msq-'+sid);
+  state.renderOptions(sid,state.allOptions,state.selected,q?q.value:'');
+  state.render();
+}
+function msClear(sid,escapedTag){
+  const state=window['_ms_'+sid];if(!state)return;
+  const tag=unesc2(escapedTag);
+  state.selected=[];syncMapping(tag,[]);
+  state.render();renderMappingSummary();
+}
+function msClose(sid){
+  const state=window['_ms_'+sid];if(!state)return;
+  // close panel
+  const panel=document.getElementById('msp-'+sid);
+  const trigger=document.getElementById('mst-'+sid);
+  if(panel)panel.classList.remove('open');
+  if(trigger)trigger.classList.remove('open');
+  renderMappingSummary();
+}
+
+function syncMapping(tag,selected){
+  mapping[tag]=[...selected];
+  renderMappingSummary();
+}
+
+// Close panels when clicking outside
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.ms-wrap')){
+    document.querySelectorAll('.ms-panel.open').forEach(p=>p.classList.remove('open'));
+    document.querySelectorAll('.ms-trigger.open').forEach(t=>t.classList.remove('open'));
+    // sync panel state
+    document.querySelectorAll('.ms-wrap').forEach(w=>{if(w._msState)w._msState.panelOpen=false;});
+    renderMappingSummary();
+  }
+},true);
+
+function renderMappingSummary(){
+  const tags=getUniqueTags();
+  const mapped=tags.filter(t=>mapping[t]?.length);
+  const unmapped=tags.filter(t=>!mapping[t]?.length);
+  let html=`<div style="font-size:12px;color:var(--text2);margin-bottom:10px">${mapped.length}/${tags.length} tag sudah di-mapping</div>`;
+  html+=mapped.map(tag=>`<div style="margin-bottom:7px;padding:8px 10px;background:#f9fafb;border-radius:8px;font-size:12px">
+    <span class="tag-badge" style="margin-right:6px">${esc(tag)}</span>
+    <span style="color:var(--text2)">→ ${esc(mapping[tag].join(' / '))}</span>
+  </div>`).join('');
+  if(unmapped.length) html+=`<div style="font-size:12px;color:var(--text3);margin-top:10px;line-height:1.8">⚠️ Belum mapping:<br>${unmapped.map(t=>`<span class="tag-badge" style="margin:2px 2px 2px 0">${esc(t)}</span>`).join('')}</div>`;
+  document.getElementById('mapping-summary').innerHTML=html;
+}
+function saveMapping(){renderMappingSummary();alert('Mapping disimpan! Buka tab Dashboard.');}
+
+// ======================== DATE ========================
+function getDateRange(){return{from:document.getElementById('date-from')?.value||null,to:document.getElementById('date-to')?.value||null};}
+function inRange(dt,from,to){
+  if(!from&&!to)return true;
+  const d=String(dt).slice(0,10);
+  if(from&&d<from)return false;
+  if(to&&d>to)return false;
+  return true;
+}
+function setPreset(p,el){
+  document.querySelectorAll('.date-preset').forEach(b=>b.classList.remove('active'));el.classList.add('active');
+  const today=new Date().toISOString().slice(0,10);
+  if(p==='today'){document.getElementById('date-from').value=today;document.getElementById('date-to').value=today;}
+  else if(p==='7d'){const d=new Date();d.setDate(d.getDate()-6);document.getElementById('date-from').value=d.toISOString().slice(0,10);document.getElementById('date-to').value=today;}
+  else{document.getElementById('date-from').value='';document.getElementById('date-to').value='';}
+  renderDashboard();
+}
+function applyDateFilter(){renderDashboard();}
+
+// ======================== AGGREGATION ========================
+function computeCampaignSpend(from,to){
+  const spend={},clicks={};
+  rawMeta.forEach(r=>{
+    const dt=(r['Reporting starts']||'').slice(0,10);
+    if(!inRange(dt,from,to))return;
+    const c=r['Campaign name'];
+    spend[c]=(spend[c]||0)+parseFloat(r['Amount spent (IDR)']||0);
+    clicks[c]=(clicks[c]||0)+parseFloat(r['Unique link clicks']||0);
+  });
+  return{spend,clicks};
+}
+function computeTagStats(from,to){
+  const ts={};
+  rawClicks.forEach(r=>{
+    const tag=extractBaseTag(r['Tag_link']||'');if(!tag)return;
+    const dt=(r['Waktu Klik']||'').slice(0,10);if(!inRange(dt,from,to))return;
+    if(!ts[tag])ts[tag]=newStat(tag);
+    ts[tag].shopeeClicks++;
+  });
+  rawOrders.forEach(r=>{
+    const tag=(r['Tag_link1']||'').trim();if(!tag||tag==='Ada')return;
+    const dt=(r['Waktu Pemesanan']||'').slice(0,10);if(!inRange(dt,from,to))return;
+    if(!ts[tag])ts[tag]=newStat(tag);
+    if(r['Status Pesanan']==='Dibatalkan')return;
+    ts[tag].orders++;ts[tag].komisi+=parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);
+    ts[tag].gmv+=parseFloat(r['Nilai Pembelian(Rp)']||0);
+  });
+  const{spend:cS,clicks:cC}=computeCampaignSpend(from,to);
+  Object.entries(ts).forEach(([tag,s])=>{
+    const camps=mapping[tag]||[];
+    camps.forEach(c=>{s.spend+=(cS[c]||0);s.metaClicks+=(cC[c]||0);});
+    s.ppnAmount=getPpnAmount(s.spend);s.totalCost=getTotalCost(s.spend);
+    s.profit=s.komisi-s.totalCost;
+    s.roi=s.totalCost>0?(s.profit/s.totalCost*100):null;
+    s.cvr=s.shopeeClicks>0?(s.orders/s.shopeeClicks*100):null;
+    s.clickThru=s.metaClicks>0?(s.shopeeClicks/s.metaClicks*100):null;
+    s.campaigns=camps;
+  });
+  return ts;
+}
+function newStat(tag){return{tag,shopeeClicks:0,orders:0,komisi:0,gmv:0,spend:0,metaClicks:0,ppnAmount:0,totalCost:0,profit:0,roi:null,cvr:null,clickThru:null,campaigns:[]};}
+
+function computeDailyStats(from,to){
+  const days={};
+  rawMeta.forEach(r=>{
+    const dt=(r['Reporting starts']||'').slice(0,10);if(!inRange(dt,from,to))return;
+    if(!days[dt])days[dt]={spend:0,komisi:0};
+    days[dt].spend+=parseFloat(r['Amount spent (IDR)']||0);
+  });
+  rawOrders.forEach(r=>{
+    if(r['Status Pesanan']==='Dibatalkan')return;
+    const dt=(r['Waktu Pemesanan']||'').slice(0,10);if(!inRange(dt,from,to))return;
+    if(!days[dt])days[dt]={spend:0,komisi:0};
+    days[dt].komisi+=parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);
+  });
+  return Object.entries(days).sort(([a],[b])=>a.localeCompare(b)).map(([dt,d])=>({
+    dt,spend:d.spend,komisi:d.komisi,totalCost:getTotalCost(d.spend),profit:d.komisi-getTotalCost(d.spend)
+  }));
+}
+
+// ======================== DASHBOARD ========================
+function renderDashboard(){
+  if(!rawMeta.length&&!rawOrders.length)return;
+  const{from,to}=getDateRange();
+  const ts=computeTagStats(from,to);
+  const daily=computeDailyStats(from,to);
+  const all=Object.values(ts);
+  const totSpend=all.reduce((s,t)=>s+t.spend,0);
+  const totPPN=all.reduce((s,t)=>s+t.ppnAmount,0);
+  const totCost=all.reduce((s,t)=>s+t.totalCost,0);
+  const totKomisi=all.reduce((s,t)=>s+t.komisi,0);
+  const totProfit=totKomisi-totCost;
+  const totOrders=all.reduce((s,t)=>s+t.orders,0);
+  const totShopee=all.reduce((s,t)=>s+t.shopeeClicks,0);
+  const totMeta=all.reduce((s,t)=>s+t.metaClicks,0);
+  const roi=totCost>0?(totProfit/totCost*100).toFixed(1):'-';
+  const ctr=totMeta>0?(totShopee/totMeta*100).toFixed(1):'-';
+  const cvr=totShopee>0?(totOrders/totShopee*100).toFixed(1):'-';
+
+  document.getElementById('dash-metrics').innerHTML=
+    M('Total Spend','Rp '+fmt(totSpend),'sebelum PPN','blue')+
+    M('PPN ('+ppnRate+'%)','Rp '+fmt(totPPN),'biaya pajak','yellow')+
+    M('Total Biaya','Rp '+fmt(totCost),'spend + PPN','red')+
+    M('Klik Meta',fmt(totMeta),'unique link clicks','')+
+    M('Klik Shopee',fmt(totShopee),'Click-thru: '+ctr+'%','')+
+    M('CVR Shopee',cvr+'%',fmt(totOrders)+' order','purple')+
+    M('Total Komisi','Rp '+fmt(totKomisi),'incl. pending','')+
+    M('Net Profit','Rp '+fmt(totProfit),'ROI: '+roi+'%',totProfit>=0?'green':'red');
+
+  renderDailyChart(daily);renderProfitChart(daily);renderDashTable(ts);
+}
+function renderDailyChart(daily){
+  const ctx=document.getElementById('chart-daily').getContext('2d');
+  if(chartDaily)chartDaily.destroy();
+  chartDaily=new Chart(ctx,{type:'bar',data:{labels:daily.map(d=>d.dt.slice(5)),datasets:[
+    {label:'Total Biaya (incl PPN)',data:daily.map(d=>Math.round(d.totalCost)),backgroundColor:'#fca5a5',borderRadius:3},
+    {label:'Komisi',data:daily.map(d=>Math.round(d.komisi)),backgroundColor:'#86efac',borderRadius:3}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10}}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'Rp '+fmt(v),font:{size:10}}},x:{ticks:{font:{size:10}}}}}});
+}
+function renderProfitChart(daily){
+  const ctx=document.getElementById('chart-profit').getContext('2d');
+  if(chartProfit)chartProfit.destroy();
+  chartProfit=new Chart(ctx,{type:'bar',data:{labels:daily.map(d=>d.dt.slice(5)),datasets:[
+    {label:'Profit',data:daily.map(d=>Math.round(d.profit)),backgroundColor:daily.map(d=>d.profit>=0?'#4ade80':'#f87171'),borderRadius:3}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false,ticks:{callback:v=>'Rp '+fmt(v),font:{size:10}}},x:{ticks:{font:{size:10}}}}}});
+}
+function renderDashTable(ts){
+  if(!ts){const{from,to}=getDateRange();ts=computeTagStats(from,to);}
+  const by=document.getElementById('sort-dash')?.value||'profit';
+  const rows=Object.values(ts).sort((a,b)=>{
+    if(by==='spend')return b.spend-a.spend;if(by==='komisi')return b.komisi-a.komisi;
+    if(by==='roi')return(b.roi||0)-(a.roi||0);if(by==='cvr')return(b.cvr||0)-(a.cvr||0);
+    return b.profit-a.profit;
+  });
+  document.getElementById('dash-table-body').innerHTML=rows.map(r=>`<tr>
+    <td><span class="tag-badge">${esc(r.tag)}</span></td>
+    <td style="font-size:11px;color:var(--text2);max-width:180px">${r.campaigns.length?r.campaigns.join('<br>'):'<em style="color:var(--text3)">Belum mapping</em>'}</td>
+    <td>${fmt(r.spend)}</td>
+    <td style="color:var(--yellow)">${ppnRate>0?fmt(Math.round(r.ppnAmount)):'-'}</td>
+    <td style="font-weight:600">${fmt(Math.round(r.totalCost))}</td>
+    <td>${fmt(r.metaClicks)}</td>
+    <td>${fmt(r.shopeeClicks)}</td>
+    <td>${ctrB(r.clickThru)}</td>
+    <td>${fmt(r.orders)}</td>
+    <td>${cvrB(r.cvr)}</td>
+    <td>${fmt(Math.round(r.komisi))}</td>
+    <td style="font-weight:700;color:${r.profit>=0?'var(--green)':'var(--red)'}">${r.profit>=0?'+':''}${fmt(Math.round(r.profit))}</td>
+    <td>${r.roi!==null?r.roi.toFixed(1)+'%':'-'}</td>
+    <td>${statusB(r.profit,r.totalCost)}</td>
+  </tr>`).join('');
+}
+
+// ======================== DETAIL ========================
+function renderDetailPage(){
+  const camps=getUniqueCampaigns();
+  const sel=document.getElementById('detail-campaign');
+  if(sel.options.length<=1)camps.forEach(c=>{const o=new Option(c,c);sel.appendChild(o);});
+  const selC=sel.value;
+  const from=document.getElementById('detail-from')?.value||'';
+  const to=document.getElementById('detail-to')?.value||'';
+  const rows=[];
+  const dates=[...new Set([
+    ...rawMeta.map(r=>(r['Reporting starts']||'').slice(0,10)),
+    ...rawOrders.map(r=>(r['Waktu Pemesanan']||'').slice(0,10))
+  ].filter(Boolean))].sort();
+  getUniqueTags().forEach(tag=>{
+    const camps=mapping[tag]||[];
+    if(selC&&!camps.includes(selC))return;
+    const fc=selC?[selC]:camps;
+    dates.forEach(dt=>{
+      if(!inRange(dt,from,to))return;
+      let spend=0,metaClicks=0;
+      fc.forEach(c=>{rawMeta.filter(r=>r['Campaign name']===c&&(r['Reporting starts']||'').slice(0,10)===dt).forEach(r=>{spend+=parseFloat(r['Amount spent (IDR)']||0);metaClicks+=parseFloat(r['Unique link clicks']||0);});});
+      let orders=0,komisi=0,shopeeClicks=0;
+      rawOrders.filter(r=>(r['Tag_link1']||'').trim()===tag&&(r['Waktu Pemesanan']||'').slice(0,10)===dt&&r['Status Pesanan']!=='Dibatalkan').forEach(r=>{orders++;komisi+=parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);});
+      rawClicks.filter(r=>extractBaseTag(r['Tag_link']||'')===tag&&(r['Waktu Klik']||'').slice(0,10)===dt).forEach(()=>shopeeClicks++);
+      if(spend===0&&komisi===0&&shopeeClicks===0)return;
+      const ppnAmt=getPpnAmount(spend),totalCost=getTotalCost(spend),profit=komisi-totalCost;
+      rows.push({dt,tag,campaigns:fc,spend,ppnAmt,totalCost,metaClicks,shopeeClicks,orders,komisi,profit,
+        roi:totalCost>0?profit/totalCost*100:null,
+        cvr:shopeeClicks>0?orders/shopeeClicks*100:null,
+        clickThru:metaClicks>0?shopeeClicks/metaClicks*100:null});
+    });
+  });
+  const tS=rows.reduce((s,r)=>s+r.spend,0),tPPN=rows.reduce((s,r)=>s+r.ppnAmt,0),tC=rows.reduce((s,r)=>s+r.totalCost,0);
+  const tK=rows.reduce((s,r)=>s+r.komisi,0),tP=tK-tC,tO=rows.reduce((s,r)=>s+r.orders,0);
+  const tM=rows.reduce((s,r)=>s+r.metaClicks,0),tSh=rows.reduce((s,r)=>s+r.shopeeClicks,0);
+  document.getElementById('detail-metrics').innerHTML=
+    M('Total Spend','Rp '+fmt(tS),'','blue')+M('PPN','Rp '+fmt(tPPN),ppnRate+'%','yellow')+
+    M('Total Biaya','Rp '+fmt(tC),'incl PPN','red')+M('Klik Meta',fmt(tM),'','')+
+    M('Klik Shopee',fmt(tSh),'CTR: '+(tM>0?(tSh/tM*100).toFixed(1):'-')+'%','')+
+    M('CVR',(tSh>0?(tO/tSh*100).toFixed(1):'-')+'%',fmt(tO)+' order','purple')+
+    M('Komisi','Rp '+fmt(tK),'','')+M('Net Profit','Rp '+fmt(tP),tC>0?(tP/tC*100).toFixed(1)+'% ROI':'',tP>=0?'green':'red');
+  document.getElementById('detail-table-body').innerHTML=rows.map(r=>`<tr>
+    <td>${r.dt}</td>
+    <td style="font-size:11px;color:var(--text2);max-width:160px">${r.campaigns.join(', ')}</td>
+    <td><span class="tag-badge">${esc(r.tag)}</span></td>
+    <td>${fmt(r.spend)}</td><td style="color:var(--yellow)">${ppnRate>0?fmt(Math.round(r.ppnAmt)):'-'}</td>
+    <td style="font-weight:600">${fmt(Math.round(r.totalCost))}</td>
+    <td>${fmt(r.metaClicks)}</td><td>${fmt(r.shopeeClicks)}</td><td>${ctrB(r.clickThru)}</td>
+    <td>${fmt(r.orders)}</td><td>${cvrB(r.cvr)}</td>
+    <td>${fmt(Math.round(r.komisi))}</td>
+    <td style="font-weight:700;color:${r.profit>=0?'var(--green)':'var(--red)'}">${r.profit>=0?'+':''}${fmt(Math.round(r.profit))}</td>
+    <td>${r.roi!==null?r.roi.toFixed(1)+'%':'-'}</td>
+    <td>${statusB(r.profit,r.totalCost)}</td>
+  </tr>`).join('');
+}
+
+// ======================== TAGS ========================
+function renderTagsPage(){
+  const from=document.getElementById('tags-from')?.value||'';
+  const to=document.getElementById('tags-to')?.value||'';
+  const ts=computeTagStats(from||null,to||null);
+  const rows=Object.values(ts).sort((a,b)=>b.komisi-a.komisi);
+  const tK=rows.reduce((s,r)=>s+r.komisi,0),tCl=rows.reduce((s,r)=>s+r.shopeeClicks,0);
+  const tO=rows.reduce((s,r)=>s+r.orders,0),tC=rows.reduce((s,r)=>s+r.totalCost,0),tM=rows.reduce((s,r)=>s+r.metaClicks,0);
+  document.getElementById('tags-metrics').innerHTML=
+    M('Tag Aktif',rows.length,'unique tags','')+M('Klik Meta',fmt(tM),'','blue')+
+    M('Klik Shopee',fmt(tCl),'CTR: '+(tM>0?(tCl/tM*100).toFixed(1):'-')+'%','')+
+    M('CVR Overall',(tCl>0?(tO/tCl*100).toFixed(1):'-')+'%',fmt(tO)+' order','purple')+
+    M('Total Komisi','Rp '+fmt(tK),'','green')+M('Total Biaya','Rp '+fmt(tC),'incl PPN '+ppnRate+'%','red');
+
+  const top10=rows.slice(0,10);
+  const ctxK=document.getElementById('chart-tag-komisi').getContext('2d');
+  if(chartTagKomisi)chartTagKomisi.destroy();
+  chartTagKomisi=new Chart(ctxK,{type:'bar',indexAxis:'y',data:{labels:top10.map(r=>r.tag),datasets:[{label:'Komisi',data:top10.map(r=>Math.round(r.komisi)),backgroundColor:'#818cf8',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>'Rp '+fmt(v),font:{size:10}}},y:{ticks:{font:{size:10}}}}}});
+
+  const top10cvr=[...rows].filter(r=>r.cvr!==null).sort((a,b)=>b.cvr-a.cvr).slice(0,10);
+  const ctxC=document.getElementById('chart-tag-cvr').getContext('2d');
+  if(chartTagCvr)chartTagCvr.destroy();
+  chartTagCvr=new Chart(ctxC,{type:'bar',indexAxis:'y',data:{labels:top10cvr.map(r=>r.tag),datasets:[{label:'CVR %',data:top10cvr.map(r=>parseFloat(r.cvr.toFixed(2))),backgroundColor:'#34d399',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>v+'%',font:{size:10}}},y:{ticks:{font:{size:10}}}}}});
+
+  document.getElementById('tags-table-body').innerHTML=rows.map(r=>`<tr>
+    <td><span class="tag-badge">${esc(r.tag)}</span></td>
+    <td>${fmt(r.metaClicks)}</td><td>${fmt(r.shopeeClicks)}</td><td>${ctrB(r.clickThru)}</td>
+    <td>${fmt(r.orders)}</td><td>${cvrB(r.cvr)}</td><td>${fmt(Math.round(r.komisi))}</td>
+    <td>${r.totalCost>0?`${fmt(Math.round(r.spend))} <span style="color:var(--yellow);font-size:10px">+PPN ${fmt(Math.round(r.ppnAmount))}</span>`:'<span style="color:var(--text3)">Belum mapping</span>'}</td>
+    <td style="font-weight:700;color:${r.profit>=0?'var(--green)':'var(--red)'}">${r.totalCost>0?(r.profit>=0?'+':'')+fmt(Math.round(r.profit)):'<span style="color:var(--text3)">-</span>'}</td>
+    <td>${r.roi!==null?r.roi.toFixed(1)+'%':'-'}</td>
+    <td>${r.totalCost>0?statusB(r.profit,r.totalCost):'<span class="badge badge-pending">Belum mapping</span>'}</td>
+  </tr>`).join('');
+}
+
+// ======================== HELPERS ========================
+function M(label,value,sub,cls){return`<div class="metric ${cls}"><div class="label">${label}</div><div class="value">${value}</div><div class="sub">${sub||'&nbsp;'}</div></div>`;}
+function statusB(profit,cost){
+  if(cost===0)return'<span class="badge badge-pending">No Spend</span>';
+  const r=profit/cost;
+  if(r>0.05)return'<span class="badge badge-profit">Profit</span>';
+  if(r<-0.05)return'<span class="badge badge-loss">Rugi</span>';
+  return'<span class="badge badge-break">Break Even</span>';
+}
+function cvrB(cvr){if(cvr===null)return'<span style="color:var(--text3)">-</span>';const c=cvr>=5?'cvr-high':cvr>=2?'cvr-mid':'cvr-low';return`<span class="${c}">${cvr.toFixed(1)}%</span>`;}
+function ctrB(ctr){if(ctr===null)return'<span style="color:var(--text3)">-</span>';const c=ctr>=60?'cvr-high':ctr>=30?'cvr-mid':'cvr-low';return`<span class="${c}">${ctr.toFixed(1)}%</span>`;}
+function fmt(n){if(n===undefined||n===null)return'0';return Math.round(n).toLocaleString('id-ID');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function esc2(s){return encodeURIComponent(String(s||''));}
+function unesc2(s){try{return decodeURIComponent(s);}catch(e){return s;}}
+function safeId(s){return btoa(encodeURIComponent(s)).replace(/[^a-zA-Z0-9]/g,'');}
+
+updatePpnUi();
+</script>
+</body>
+</html>
