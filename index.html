@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shopee Affiliate Tracker By @Hamziyadd</title>
+<title>Shopee Affiliate Tracker By @HamZiyadd</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -165,12 +165,44 @@
   .search-input{padding:6px 11px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--card);color:var(--text);}
   .tag-search-wrap{position:relative;margin-bottom:12px;}
   .tag-search-wrap input{width:100%;}
+
+  /* ============================================================
+     TAG DETAIL MODAL
+     ============================================================ */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;backdrop-filter:blur(2px);}
+  .modal-overlay.hidden{display:none;}
+  .modal{background:var(--card);border-radius:16px;width:100%;max-width:960px;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:modalIn .2s ease;}
+  @keyframes modalIn{from{opacity:0;transform:translateY(-16px);}to{opacity:1;transform:translateY(0);}}
+  .modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--border);}
+  .modal-header-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .modal-title{font-size:17px;font-weight:700;}
+  .modal-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all .15s;flex-shrink:0;}
+  .modal-close:hover{background:#f3f4f6;color:var(--text);}
+  .modal-body{padding:20px 24px;}
+  .modal-presets{display:flex;gap:4px;flex-wrap:wrap;}
+  .modal-preset{padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--card);cursor:pointer;font-size:12px;color:var(--text2);transition:all .15s;}
+  .modal-preset.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .modal-date-row{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap;}
+  .modal-date-row input[type=date]{padding:5px 9px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-size:13px;}
+  .modal-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:16px 0;}
+  .modal-chart-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+  @media(max-width:680px){.modal-chart-row{grid-template-columns:1fr;}}
+  .modal-chart-card{background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:14px;}
+  .modal-chart-card h4{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px;}
+  .modal-chart-wrap{position:relative;height:180px;}
+  .modal-table-wrap{overflow-x:auto;max-height:280px;overflow-y:auto;}
+  .modal-table-wrap table{font-size:12px;}
+  .modal-campaigns{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px;}
+  .camp-pill{background:#f3f4f6;border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--text2);}
+  /* clickable tag badge in table */
+  .tag-badge-btn{cursor:pointer;transition:all .15s;}
+  .tag-badge-btn:hover{background:#c4b5fd;transform:scale(1.04);}
 </style>
 </head>
 <body>
 
 <nav class="nav">
-  <div class="nav-brand"><div class="dot"></div> Shopee Affiliate Tracker by @Hamziyadd</div>
+  <div class="nav-brand"><div class="dot"></div> Shopee Affiliate Tracker By @HamZiyadd </div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('upload',this)">Upload Data</button>
     <button class="nav-tab" onclick="showPage('mapping',this)">Mapping Iklan</button>
@@ -368,6 +400,69 @@
         <th>Tag</th><th>Klik Meta</th><th>Klik Shopee</th><th>Click-thru%</th>
         <th>Order</th><th>CVR</th><th>Komisi (Rp)</th><th>Total Biaya (Rp)</th><th>Profit (Rp)</th><th>ROI</th><th>Status</th>
       </tr></thead><tbody id="tags-table-body"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- ========== TAG DETAIL MODAL ========== -->
+<div class="modal-overlay hidden" id="tag-modal" onclick="handleModalOverlayClick(event)">
+  <div class="modal" id="tag-modal-box">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div>
+          <div class="modal-title" id="modal-tag-name">—</div>
+          <div class="modal-campaigns" id="modal-campaigns" style="margin-top:6px;margin-bottom:0"></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Date presets -->
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="font-size:12px;color:var(--text2);font-weight:500">Periode:</span>
+        <div class="modal-presets">
+          <button class="modal-preset" onclick="setModalPreset(3,this)">3 Hari</button>
+          <button class="modal-preset active" onclick="setModalPreset(7,this)">7 Hari</button>
+          <button class="modal-preset" onclick="setModalPreset(30,this)">30 Hari</button>
+          <button class="modal-preset" onclick="setModalPreset(0,this)">Semua</button>
+          <button class="modal-preset" onclick="setModalPreset(-1,this)">Custom</button>
+        </div>
+        <div class="modal-date-row" id="modal-custom-dates" style="display:none">
+          <input type="date" id="modal-from" onchange="renderModal()">
+          <span style="color:var(--text2)">–</span>
+          <input type="date" id="modal-to" onchange="renderModal()">
+        </div>
+      </div>
+
+      <!-- Summary metrics -->
+      <div class="modal-metrics" id="modal-metrics"></div>
+
+      <!-- Charts -->
+      <div class="modal-chart-row">
+        <div class="modal-chart-card">
+          <h4>Spend+PPN vs Komisi per Hari</h4>
+          <div class="modal-chart-wrap"><canvas id="modal-chart-spend"></canvas></div>
+        </div>
+        <div class="modal-chart-card">
+          <h4>Profit / Rugi per Hari</h4>
+          <div class="modal-chart-wrap"><canvas id="modal-chart-profit"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Daily breakdown table -->
+      <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Breakdown Harian</div>
+      <div class="modal-table-wrap">
+        <table>
+          <thead><tr>
+            <th>Tanggal</th>
+            <th>Spend</th><th>PPN</th><th>Total Biaya</th>
+            <th>Klik Meta</th><th>Klik Shopee</th><th>CTR%</th>
+            <th>Order</th><th>CVR</th>
+            <th>Komisi</th><th>ROAS</th><th>Profit</th><th>ROI</th><th>Status</th>
+          </tr></thead>
+          <tbody id="modal-table-body"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
@@ -868,7 +963,7 @@ function renderDashTable(ts){
     const roasVal=r.roas!==null?r.roas.toFixed(2)+'x':'-';
     const roasCls=r.roas!==null?(r.roas>=1.5?'cvr-high':r.roas>=1?'cvr-mid':'cvr-low'):'';
     return`<tr style="${rowBg}">
-    <td><span class="tag-badge">${esc(r.tag)}</span></td>
+    <td><span class="tag-badge tag-badge-btn" onclick="openTagModal('${esc2(r.tag)}')" title="Klik untuk lihat detail">${esc(r.tag)} ↗</span></td>
     <td style="font-size:11px;color:var(--text2);max-width:180px">${r.campaigns.length?r.campaigns.join('<br>'):'<em style="color:var(--text3)">Belum mapping</em>'}</td>
     <td>${fmt(r.spend)}</td>
     <td style="color:var(--yellow)">${ppnRate>0?fmt(Math.round(r.ppnAmount)):'-'}</td>
@@ -938,7 +1033,7 @@ function renderDetailPage(){
     return`<tr style="${rowBg}">
     <td>${r.dt}</td>
     <td style="font-size:11px;color:var(--text2);max-width:160px">${r.campaigns.join(', ')}</td>
-    <td><span class="tag-badge">${esc(r.tag)}</span></td>
+    <td><span class="tag-badge tag-badge-btn" onclick="openTagModal('${esc2(r.tag)}')" title="Klik untuk lihat detail">${esc(r.tag)} ↗</span></td>
     <td>${fmt(r.spend)}</td><td style="color:var(--yellow)">${ppnRate>0?fmt(Math.round(r.ppnAmt)):'-'}</td>
     <td style="font-weight:600">${fmt(Math.round(r.totalCost))}</td>
     <td>${fmt(r.metaClicks)}</td><td>${fmt(r.shopeeClicks)}</td><td>${ctrB(r.clickThru)}</td>
@@ -976,7 +1071,7 @@ function renderTagsPage(){
   chartTagCvr=new Chart(ctxC,{type:'bar',indexAxis:'y',data:{labels:top10cvr.map(r=>r.tag),datasets:[{label:'CVR %',data:top10cvr.map(r=>parseFloat(r.cvr.toFixed(2))),backgroundColor:'#34d399',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>v+'%',font:{size:10}}},y:{ticks:{font:{size:10}}}}}});
 
   document.getElementById('tags-table-body').innerHTML=rows.map(r=>`<tr>
-    <td><span class="tag-badge">${esc(r.tag)}</span></td>
+    <td><span class="tag-badge tag-badge-btn" onclick="openTagModal('${esc2(r.tag)}')" title="Klik untuk lihat detail">${esc(r.tag)} ↗</span></td>
     <td>${fmt(r.metaClicks)}</td><td>${fmt(r.shopeeClicks)}</td><td>${ctrB(r.clickThru)}</td>
     <td>${fmt(r.orders)}</td><td>${cvrB(r.cvr)}</td><td>${fmt(Math.round(r.komisi))}</td>
     <td>${r.totalCost>0?`${fmt(Math.round(r.spend))} <span style="color:var(--yellow);font-size:10px">+PPN ${fmt(Math.round(r.ppnAmount))}</span>`:'<span style="color:var(--text3)">Belum mapping</span>'}</td>
@@ -1003,7 +1098,245 @@ function esc2(s){return encodeURIComponent(String(s||''));}
 function unesc2(s){try{return decodeURIComponent(s);}catch(e){return s;}}
 function safeId(s){return btoa(encodeURIComponent(s)).replace(/[^a-zA-Z0-9]/g,'');}
 
-updatePpnUi();
+<!-- ========== TAG DETAIL MODAL ========== -->
+<div class="modal-overlay hidden" id="tag-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <span class="tag-badge" id="modal-tag-name" style="font-size:13px;padding:4px 12px"></span>
+        <div class="modal-campaigns" id="modal-campaigns"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Preset buttons -->
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+        <span style="font-size:12px;color:var(--text2);font-weight:500">Periode:</span>
+        <div class="modal-presets">
+          <button class="modal-preset" onclick="setModalPreset(3,this)">3 Hari</button>
+          <button class="modal-preset active" onclick="setModalPreset(7,this)">7 Hari</button>
+          <button class="modal-preset" onclick="setModalPreset(30,this)">30 Hari</button>
+          <button class="modal-preset" onclick="setModalPreset(0,this)">Semua</button>
+        </div>
+        <div class="modal-date-row" style="margin-top:0">
+          <span style="font-size:12px;color:var(--text3)">atau custom:</span>
+          <input type="date" id="modal-from" onchange="renderModal()">
+          <span style="color:var(--text3)">–</span>
+          <input type="date" id="modal-to" onchange="renderModal()">
+        </div>
+      </div>
+
+      <!-- Summary metrics -->
+      <div class="modal-metrics" id="modal-metrics"></div>
+
+      <!-- Charts -->
+      <div class="modal-chart-row">
+        <div class="modal-chart-card">
+          <h4>Spend + PPN vs Komisi per Hari</h4>
+          <div class="modal-chart-wrap"><canvas id="modal-chart-spend"></canvas></div>
+        </div>
+        <div class="modal-chart-card">
+          <h4>Profit / Rugi per Hari</h4>
+          <div class="modal-chart-wrap"><canvas id="modal-chart-profit"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Daily breakdown table -->
+      <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">Rincian Harian</div>
+      <div class="modal-table-wrap">
+        <table>
+          <thead><tr>
+            <th>Tanggal</th>
+            <th>Spend</th><th>PPN</th><th>Total Biaya</th>
+            <th>Klik Meta</th><th>Klik Shopee</th><th>CTR%</th>
+            <th>Order</th><th>CVR</th>
+            <th>Komisi</th><th>ROAS</th><th>Profit</th><th>ROI</th><th>Status</th>
+          </tr></thead>
+          <tbody id="modal-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ======================== TAG MODAL ========================
+let modalTag = null;
+let modalChartSpend = null, modalChartProfit = null;
+
+function openTagModal(encodedTag) {
+  const tag = unesc2(encodedTag);
+  modalTag = tag;
+  document.getElementById('modal-tag-name').textContent = tag;
+
+  // Show mapped campaigns as pills
+  const camps = mapping[tag] || [];
+  document.getElementById('modal-campaigns').innerHTML =
+    camps.length
+      ? camps.map(c => `<span class="camp-pill">📢 ${esc(c)}</span>`).join('')
+      : '<span class="camp-pill" style="color:var(--text3)">Belum di-mapping</span>';
+
+  // Default: 7 hari ke belakang dari kemarin
+  setModalPreset(7, document.querySelector('.modal-preset.active') || document.querySelectorAll('.modal-preset')[1]);
+
+  document.getElementById('tag-modal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('tag-modal').classList.add('hidden');
+  document.body.style.overflow = '';
+  if (modalChartSpend) { modalChartSpend.destroy(); modalChartSpend = null; }
+  if (modalChartProfit) { modalChartProfit.destroy(); modalChartProfit = null; }
+}
+
+function setModalPreset(days, el) {
+  document.querySelectorAll('.modal-preset').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+  const yd = yesterday.toISOString().slice(0, 10);
+  if (days === 0) {
+    document.getElementById('modal-from').value = '';
+    document.getElementById('modal-to').value = '';
+  } else {
+    const from = new Date(yesterday);
+    from.setDate(from.getDate() - (days - 1));
+    document.getElementById('modal-from').value = from.toISOString().slice(0, 10);
+    document.getElementById('modal-to').value = yd;
+  }
+  renderModal();
+}
+
+function renderModal() {
+  if (!modalTag) return;
+  const tag = modalTag;
+  const from = document.getElementById('modal-from').value || null;
+  const to = document.getElementById('modal-to').value || null;
+  const camps = mapping[tag] || [];
+
+  // Build daily rows for this tag
+  const allDates = [...new Set([
+    ...rawMeta.map(r => (r['date_start'] || '').slice(0, 10)),
+    ...rawOrders.map(r => (r['Waktu Pemesanan'] || '').slice(0, 10)),
+    ...rawClicks.map(r => (r['Waktu Klik'] || '').slice(0, 10))
+  ].filter(Boolean))].sort();
+
+  const rows = [];
+  allDates.forEach(dt => {
+    if (!inRange(dt, from, to)) return;
+    let spend = 0, metaClicks = 0;
+    camps.forEach(c => {
+      rawMeta.filter(r => r['campaign_name'] === c && (r['date_start'] || '').slice(0, 10) === dt)
+        .forEach(r => { spend += parseFloat(r['spend'] || 0); metaClicks += parseFloat(r['link_clicks'] || 0); });
+    });
+    let orders = 0, komisi = 0, shopeeClicks = 0;
+    rawOrders.filter(r => (r['Tag_link1'] || '').trim() === tag && (r['Waktu Pemesanan'] || '').slice(0, 10) === dt && r['Status Pesanan'] !== 'Dibatalkan')
+      .forEach(r => { orders++; komisi += parseFloat(r['Komisi Bersih Affiliate (Rp)'] || 0); });
+    rawClicks.filter(r => extractBaseTag(r['Tag_link'] || '') === tag && (r['Waktu Klik'] || '').slice(0, 10) === dt)
+      .forEach(() => shopeeClicks++);
+    if (spend === 0 && komisi === 0 && shopeeClicks === 0) return;
+    const ppnAmt = getPpnAmount(spend);
+    const totalCost = getTotalCost(spend);
+    const profit = komisi - totalCost;
+    rows.push({
+      dt, spend, ppnAmt, totalCost, metaClicks, shopeeClicks, orders, komisi, profit,
+      roas: totalCost > 0 ? komisi / totalCost : null,
+      roi: totalCost > 0 ? profit / totalCost * 100 : null,
+      cvr: shopeeClicks > 0 ? orders / shopeeClicks * 100 : null,
+      clickThru: metaClicks > 0 ? shopeeClicks / metaClicks * 100 : null
+    });
+  });
+
+  // Summary totals
+  const tS = rows.reduce((s, r) => s + r.spend, 0);
+  const tPPN = rows.reduce((s, r) => s + r.ppnAmt, 0);
+  const tC = rows.reduce((s, r) => s + r.totalCost, 0);
+  const tK = rows.reduce((s, r) => s + r.komisi, 0);
+  const tP = tK - tC;
+  const tO = rows.reduce((s, r) => s + r.orders, 0);
+  const tSh = rows.reduce((s, r) => s + r.shopeeClicks, 0);
+  const tM = rows.reduce((s, r) => s + r.metaClicks, 0);
+  const roi = tC > 0 ? (tP / tC * 100).toFixed(1) + '%' : '-';
+  const roas = tC > 0 ? (tK / tC).toFixed(2) + 'x' : '-';
+  const cvr = tSh > 0 ? (tO / tSh * 100).toFixed(1) + '%' : '-';
+  const ctr = tM > 0 ? (tSh / tM * 100).toFixed(1) + '%' : '-';
+
+  document.getElementById('modal-metrics').innerHTML =
+    M('Spend', 'Rp ' + fmt(Math.round(tS)), 'sebelum PPN', 'blue') +
+    M('Total Biaya', 'Rp ' + fmt(Math.round(tC)), 'incl PPN ' + ppnRate + '%', 'red') +
+    M('Klik Meta', fmt(tM), 'CTR: ' + ctr, '') +
+    M('Klik Shopee', fmt(tSh), '', '') +
+    M('Order', fmt(tO), 'CVR: ' + cvr, 'purple') +
+    M('Komisi', 'Rp ' + fmt(Math.round(tK)), '', '') +
+    M('ROAS', roas, '', tC > 0 ? (tK / tC >= 1.5 ? 'green' : tK / tC >= 1 ? 'yellow' : 'red') : '') +
+    M('Net Profit', 'Rp ' + fmt(Math.round(tP)), 'ROI: ' + roi, tP >= 0 ? 'green' : 'red');
+
+  // Charts
+  const labels = rows.map(r => r.dt.slice(5));
+  const ctx1 = document.getElementById('modal-chart-spend').getContext('2d');
+  if (modalChartSpend) modalChartSpend.destroy();
+  modalChartSpend = new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Total Biaya', data: rows.map(r => Math.round(r.totalCost)), backgroundColor: '#fca5a5', borderRadius: 3 },
+        { label: 'Komisi', data: rows.map(r => Math.round(r.komisi)), backgroundColor: '#86efac', borderRadius: 3 }
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { font: { size: 10 } } } }, scales: { y: { beginAtZero: true, ticks: { callback: v => 'Rp ' + fmt(v), font: { size: 10 } } }, x: { ticks: { font: { size: 10 } } } } }
+  });
+
+  const ctx2 = document.getElementById('modal-chart-profit').getContext('2d');
+  if (modalChartProfit) modalChartProfit.destroy();
+  modalChartProfit = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Profit',
+        data: rows.map(r => Math.round(r.profit)),
+        backgroundColor: rows.map(r => r.profit >= 0 ? '#4ade80' : '#f87171'),
+        borderRadius: 3
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        annotation: { annotations: { zeroline: { type: 'line', y: 0, borderColor: '#9ca3af', borderWidth: 1, borderDash: [4, 4] } } }
+      },
+      scales: { y: { beginAtZero: false, ticks: { callback: v => 'Rp ' + fmt(v), font: { size: 10 } } }, x: { ticks: { font: { size: 10 } } } }
+    }
+  });
+
+  // Daily table
+  document.getElementById('modal-table-body').innerHTML = rows.map(r => {
+    const isProfit = r.totalCost > 0 && r.profit > r.totalCost * 0.05;
+    const isLoss = r.totalCost > 0 && r.profit < -r.totalCost * 0.05;
+    const rowBg = isProfit ? 'background:#f0fdf4' : isLoss ? 'background:#fef2f2' : '';
+    const roasVal = r.roas !== null ? r.roas.toFixed(2) + 'x' : '-';
+    const roasCls = r.roas !== null ? (r.roas >= 1.5 ? 'cvr-high' : r.roas >= 1 ? 'cvr-mid' : 'cvr-low') : '';
+    return `<tr style="${rowBg}">
+      <td style="white-space:nowrap;font-weight:500">${r.dt}</td>
+      <td>${fmt(Math.round(r.spend))}</td>
+      <td style="color:var(--yellow)">${ppnRate > 0 ? fmt(Math.round(r.ppnAmt)) : '-'}</td>
+      <td style="font-weight:600">${fmt(Math.round(r.totalCost))}</td>
+      <td>${fmt(r.metaClicks)}</td>
+      <td>${fmt(r.shopeeClicks)}</td>
+      <td>${ctrB(r.clickThru)}</td>
+      <td>${fmt(r.orders)}</td>
+      <td>${cvrB(r.cvr)}</td>
+      <td>${fmt(Math.round(r.komisi))}</td>
+      <td class="${roasCls}" style="font-weight:600">${roasVal}</td>
+      <td style="font-weight:700;color:${r.profit >= 0 ? 'var(--green)' : 'var(--red)'}">${r.profit >= 0 ? '+' : ''}${fmt(Math.round(r.profit))}</td>
+      <td>${r.roi !== null ? r.roi.toFixed(1) + '%' : '-'}</td>
+      <td>${statusB(r.profit, r.totalCost)}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="14" style="text-align:center;color:var(--text3);padding:20px">Tidak ada data pada periode ini</td></tr>';
+}
+
+// Close modal with Escape key
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 </script>
-</body>
-</html>
+
