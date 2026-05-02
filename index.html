@@ -706,7 +706,7 @@ function computeCampaignMeta(from,to){
   });
   return{spend,clicks,results};
 }
-function newStat(tag){return{tag,shopeeClicks:0,orders:0,komisi:0,spend:0,metaClicks:0,metaResults:0,ppnAmount:0,totalCost:0,profit:0,roi:null,roas:null,cpr:null,cvr:null,clickThru:null,campaigns:[]};}
+function newStat(tag){return{tag,shopeeClicks:0,orders:0,komisi:0,komisiKotor:0,spend:0,metaClicks:0,metaResults:0,ppnAmount:0,totalCost:0,profit:0,roi:null,roas:null,cpr:null,cvr:null,clickThru:null,campaigns:[],_orderIds:new Set()};}
 function computeTagStats(from,to){
   const ts={};
   rawClicks.forEach(r=>{
@@ -714,12 +714,30 @@ function computeTagStats(from,to){
     const dt=(r['Waktu Klik']||'').slice(0,10);if(!inRange(dt,from,to))return;
     if(!ts[tag])ts[tag]=newStat(tag);ts[tag].shopeeClicks++;
   });
+  // Deduplicate by ID Pemesanan per tag — group all rows of same order together
+  // komisi bersih: sum per unique order (per tag)
+  // komisi kotor : 'Total Komisi per Produk(Rp)'
+  const orderKomisi={};    // orderId -> {bersih, kotor, tag, dt, status}
   rawOrders.forEach(r=>{
+    if(r['Status Pesanan']==='Dibatalkan')return;
     const tag=(r['Tag_link1']||'').trim();if(!tag||tag==='Ada')return;
     const dt=(r['Waktu Pemesanan']||'').slice(0,10);if(!inRange(dt,from,to))return;
+    const oid=r['ID Pemesanan']||'';
+    const key=tag+'||'+oid;
+    if(!orderKomisi[key]){orderKomisi[key]={tag,dt,oid,bersih:0,kotor:0};}
+    orderKomisi[key].bersih+=parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);
+    orderKomisi[key].kotor+=parseFloat(r['Total Komisi per Produk(Rp)']||0);
+  });
+  // Aggregate into tag stats
+  Object.values(orderKomisi).forEach(o=>{
+    const tag=o.tag;
     if(!ts[tag])ts[tag]=newStat(tag);
-    if(r['Status Pesanan']==='Dibatalkan')return;
-    ts[tag].orders++;ts[tag].komisi+=parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);
+    if(!ts[tag]._orderIds.has(o.oid)){
+      ts[tag]._orderIds.add(o.oid);
+      ts[tag].orders++;
+      ts[tag].komisi+=o.bersih;
+      ts[tag].komisiKotor+=o.kotor;
+    }
   });
   const{spend:cS,clicks:cC,results:cR}=computeCampaignMeta(from,to);
   Object.values(ts).forEach(s=>{
@@ -740,9 +758,31 @@ function computeRawSpend(from,to){let t=0;rawMeta.forEach(r=>{if(inRange((r['dat
 function computeRawClicks(from,to){let t=0;rawMeta.forEach(r=>{if(inRange((r['date_start']||'').slice(0,10),from,to))t+=parseFloat(r['link_clicks']||0);});return t;}
 function computeDailyStats(from,to){
   const days={};
-  rawMeta.forEach(r=>{const dt=(r['date_start']||'').slice(0,10);if(!inRange(dt,from,to))return;if(!days[dt])days[dt]={spend:0,komisi:0};days[dt].spend+=parseFloat(r['spend']||0);});
-  rawOrders.forEach(r=>{if(r['Status Pesanan']==='Dibatalkan')return;const dt=(r['Waktu Pemesanan']||'').slice(0,10);if(!inRange(dt,from,to))return;if(!days[dt])days[dt]={spend:0,komisi:0};days[dt].komisi+=parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);});
-  return Object.entries(days).sort(([a],[b])=>a.localeCompare(b)).map(([dt,d])=>({dt,spend:d.spend,komisi:d.komisi,totalCost:getTotalCost(d.spend),profit:d.komisi-getTotalCost(d.spend)}));
+  rawMeta.forEach(r=>{
+    const dt=(r['date_start']||'').slice(0,10);if(!inRange(dt,from,to))return;
+    if(!days[dt])days[dt]={spend:0,komisi:0,komisiKotor:0,_orderIds:new Set()};
+    days[dt].spend+=parseFloat(r['spend']||0);
+  });
+  // Deduplicate orders per day
+  const orderDaily={};  // key= dt+'||'+oid -> {bersih,kotor}
+  rawOrders.forEach(r=>{
+    if(r['Status Pesanan']==='Dibatalkan')return;
+    const dt=(r['Waktu Pemesanan']||'').slice(0,10);if(!inRange(dt,from,to))return;
+    const oid=r['ID Pemesanan']||('_'+Math.random());
+    const key=dt+'||'+oid;
+    if(!orderDaily[key])orderDaily[key]={dt,bersih:0,kotor:0};
+    orderDaily[key].bersih+=parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);
+    orderDaily[key].kotor+=parseFloat(r['Total Komisi per Produk(Rp)']||0);
+  });
+  Object.values(orderDaily).forEach(o=>{
+    if(!days[o.dt])days[o.dt]={spend:0,komisi:0,komisiKotor:0,_orderIds:new Set()};
+    days[o.dt].komisi+=o.bersih;
+    days[o.dt].komisiKotor+=o.kotor;
+  });
+  return Object.entries(days).sort(([a],[b])=>a.localeCompare(b)).map(([dt,d])=>({
+    dt,spend:d.spend,komisi:d.komisi,komisiKotor:d.komisiKotor,
+    totalCost:getTotalCost(d.spend),profit:d.komisi-getTotalCost(d.spend)
+  }));
 }
 
 // ============================================================
@@ -761,6 +801,7 @@ function renderDashboard(){
   const mappedSpend=all.reduce((s,t)=>s+t.spend,0);
   const unmapped=totSpend-mappedSpend;
   const totKomisi=all.reduce((s,t)=>s+t.komisi,0);
+  const totKomisiKotor=all.reduce((s,t)=>s+t.komisiKotor,0);
   const totProfit=totKomisi-totCost;
   const totOrders=all.reduce((s,t)=>s+t.orders,0);
   const totShopee=all.reduce((s,t)=>s+t.shopeeClicks,0);
@@ -775,7 +816,8 @@ function renderDashboard(){
     M('Klik Meta',fmt(totMetaClicks),'unique link clicks','')+
     M('Klik Shopee',fmt(totShopee),'CTR: '+ctr+'%','')+
     M('CVR Shopee',cvr+'%',fmt(totOrders)+' order','purple')+
-    M('Total Komisi','Rp '+fmt(totKomisi),'incl. pending','')+
+    M('Total Komisi Bersih','Rp '+fmt(totKomisi),'setelah potongan Shopee','')+
+    M('Komisi Kotor','Rp '+fmt(totKomisiKotor),'sebelum potongan','yellow')+
     M('Net Profit','Rp '+fmt(totProfit),'ROI: '+roi+'%',totProfit>=0?'green':'red');
   // charts
   const labels=daily.map(d=>d.dt.slice(5));
@@ -789,33 +831,49 @@ function renderDashboard(){
 }
 
 function renderDailyPerfTable(daily, from, to) {
-  // daily = [{dt, spend, komisi, totalCost, profit}] sorted ascending
-  // We also need shopeeClicks and orders per day
+  // Shopee Clicks per day (from rawClicks)
   const dayClicks = {};
   rawClicks.forEach(r => {
     const dt = (r['Waktu Klik']||'').slice(0,10);
     if (!inRange(dt, from, to)) return;
     dayClicks[dt] = (dayClicks[dt]||0) + 1;
   });
-  const dayOrders = {};
+
+  // Unique orders per day (deduplicate by ID Pemesanan)
+  const dayOrders = {};   // dt -> Set of order IDs
   rawOrders.forEach(r => {
     if (r['Status Pesanan'] === 'Dibatalkan') return;
     const dt = (r['Waktu Pemesanan']||'').slice(0,10);
     if (!inRange(dt, from, to)) return;
-    dayOrders[dt] = (dayOrders[dt]||0) + 1;
+    if (!dayOrders[dt]) dayOrders[dt] = new Set();
+    dayOrders[dt].add(r['ID Pemesanan'] || '_' + dt + Math.random());
   });
 
-  // Sort descending (newest first) like the image
+  // Update header to include Komisi Kotor column
+  const tableHeader = document.querySelector('#daily-perf-body')?.closest('table')?.querySelector('thead tr');
+  if (tableHeader) {
+    tableHeader.innerHTML = `
+      <th>Tanggal</th>
+      <th>Shopee Clicks</th>
+      <th>Pesanan</th>
+      <th>Komisi Kotor</th>
+      <th>Komisi Bersih</th>
+      <th>Ad Spend (+PPN)</th>
+      <th>Profit Bersih</th>
+      <th>ROI</th>
+      <th>ROAS</th>`;
+  }
+
+  // Sort descending (newest first)
   const rows = [...daily].sort((a,b) => b.dt.localeCompare(a.dt));
 
   if (!rows.length) {
     document.getElementById('daily-perf-body').innerHTML =
-      '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:20px">Belum ada data</td></tr>';
+      '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:20px">Belum ada data</td></tr>';
     document.getElementById('daily-perf-foot').innerHTML = '';
     return;
   }
 
-  // Format date nicely: 2026-04-30 -> 30 Apr 2026
   function fmtDt(dt) {
     const d = new Date(dt + 'T00:00:00');
     return d.toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'});
@@ -823,7 +881,7 @@ function renderDailyPerfTable(daily, from, to) {
 
   document.getElementById('daily-perf-body').innerHTML = rows.map(r => {
     const sc = dayClicks[r.dt] || 0;
-    const ord = dayOrders[r.dt] || 0;
+    const ord = dayOrders[r.dt] ? dayOrders[r.dt].size : 0;
     const roas = r.totalCost > 0 ? r.komisi / r.totalCost : null;
     const roiStr = r.totalCost > 0 ? (r.profit/r.totalCost*100).toFixed(2)+'%' : '-';
     const roasStr = roas !== null ? roas.toFixed(2)+'x' : '-';
@@ -835,6 +893,7 @@ function renderDailyPerfTable(daily, from, to) {
       <td style="font-weight:500;white-space:nowrap">${fmtDt(r.dt)}</td>
       <td>${fmt(sc)}</td>
       <td>${fmt(ord)}</td>
+      <td style="color:#d97706;font-weight:600">Rp ${fmt(r.komisiKotor||r.komisi)}</td>
       <td class="daily-komisi">Rp ${fmt(r.komisi)}</td>
       <td class="daily-spend">Rp ${fmt(r.totalCost)}</td>
       <td class="${profitCls}">${profitStr}</td>
@@ -845,7 +904,8 @@ function renderDailyPerfTable(daily, from, to) {
 
   // Footer totals
   const totSc = rows.reduce((s,r) => s + (dayClicks[r.dt]||0), 0);
-  const totOrd = rows.reduce((s,r) => s + (dayOrders[r.dt]||0), 0);
+  const totOrd = rows.reduce((s,r) => s + (dayOrders[r.dt]?dayOrders[r.dt].size:0), 0);
+  const totKomisiKotor = rows.reduce((s,r) => s + (r.komisiKotor||r.komisi), 0);
   const totKomisi = rows.reduce((s,r) => s + r.komisi, 0);
   const totCost = rows.reduce((s,r) => s + r.totalCost, 0);
   const totProfit = rows.reduce((s,r) => s + r.profit, 0);
@@ -859,8 +919,9 @@ function renderDailyPerfTable(daily, from, to) {
     <td>TOTAL (${rows.length} hari)</td>
     <td>${fmt(totSc)}</td>
     <td>${fmt(totOrd)}</td>
-    <td class="daily-komisi">Rp ${fmt(totKomisi)}</td>
-    <td class="daily-spend">Rp ${fmt(totCost)}</td>
+    <td style="color:#d97706;font-weight:700">Rp ${fmt(totKomisiKotor)}</td>
+    <td class="daily-komisi" style="font-weight:700">Rp ${fmt(totKomisi)}</td>
+    <td class="daily-spend" style="font-weight:700">Rp ${fmt(totCost)}</td>
     <td class="${totProfitCls}">${totProfitStr}</td>
     <td class="${totRoiCls}">${totRoi}</td>
     <td class="${totRoasCls}">${totRoas}</td>
@@ -868,44 +929,43 @@ function renderDailyPerfTable(daily, from, to) {
 }
 
 function renderOrderStatus(from, to) {
-  // Count all orders by status
-  const statusMap = {};
-  const komisiMap = {};
+  // Count UNIQUE orders (by ID Pemesanan) per status
+  const statusOrders = {};   // status -> Set of order IDs
+  const statusKomisi = {};   // status -> total komisi bersih
   rawOrders.forEach(r => {
     const dt = (r['Waktu Pemesanan']||'').slice(0,10);
     if (!inRange(dt, from, to)) return;
     const st = r['Status Pesanan'] || 'Tidak Diketahui';
-    statusMap[st] = (statusMap[st]||0) + 1;
-    komisiMap[st] = (komisiMap[st]||0) + parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);
+    const oid = r['ID Pemesanan'] || ('_'+Math.random());
+    if (!statusOrders[st]) statusOrders[st] = new Set();
+    statusOrders[st].add(oid);
+    statusKomisi[st] = (statusKomisi[st]||0) + parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);
   });
 
-  // Define display order and color class
   const statusConfig = [
     { key:'Selesai',       label:'Selesai',         cls:'selesai',    icon:'✅' },
     { key:'Diproses',      label:'Diproses',         cls:'diproses',   icon:'🔄' },
     { key:'Dikirim',       label:'Dikirim',          cls:'diproses',   icon:'🚚' },
+    { key:'Tertunda',      label:'Tertunda',         cls:'pending',    icon:'⏳' },
+    { key:'Belum Dibayar', label:'Belum Dibayar',    cls:'pending',    icon:'⏳' },
     { key:'Belum Bayar',   label:'Belum Bayar',      cls:'pending',    icon:'⏳' },
     { key:'Dibatalkan',    label:'Dibatalkan',       cls:'dibatalkan', icon:'❌' },
     { key:'Pengembalian',  label:'Pengembalian',     cls:'dibatalkan', icon:'↩️' },
   ];
-
-  // Collect known statuses first, then any others
   const known = statusConfig.map(s => s.key);
-  const others = Object.keys(statusMap).filter(k => !known.includes(k));
+  const others = Object.keys(statusOrders).filter(k => !known.includes(k));
   const allConfigs = [
-    ...statusConfig.filter(s => statusMap[s.key] !== undefined),
+    ...statusConfig.filter(s => statusOrders[s.key] !== undefined),
     ...others.map(k => ({ key:k, label:k, cls:'pending', icon:'📦' }))
   ];
-
   if (!allConfigs.length) {
     document.getElementById('order-status-grid').innerHTML =
       '<p style="font-size:13px;color:var(--text3)">Belum ada data pesanan.</p>';
     return;
   }
-
   document.getElementById('order-status-grid').innerHTML = allConfigs.map(cfg => {
-    const count = statusMap[cfg.key] || 0;
-    const komisi = komisiMap[cfg.key] || 0;
+    const count = statusOrders[cfg.key] ? statusOrders[cfg.key].size : 0;
+    const komisi = statusKomisi[cfg.key] || 0;
     return `<div class="order-status-card ${cfg.cls}">
       <div class="os-label">${cfg.icon} ${cfg.label}</div>
       <div class="os-count">${fmt(count)} pesanan</div>
