@@ -77,6 +77,21 @@ tr:hover td{background:#fafafa;}
 .cvr-high{color:#15803d;font-weight:600;}
 .cvr-mid{color:var(--yellow);font-weight:600;}
 .cvr-low{color:#dc2626;font-weight:600;}
+/* Daily perf table */
+.daily-profit-pos{color:var(--green);font-weight:700;}
+.daily-profit-neg{color:var(--red);font-weight:700;}
+.daily-komisi{color:#d97706;font-weight:600;}
+.daily-spend{color:#1d4ed8;font-weight:600;}
+tfoot tr td{font-weight:700;background:#f9fafb;border-top:2px solid var(--border);}
+/* Order status card */
+.order-status-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;}
+.order-status-card .os-label{font-size:11px;color:var(--text2);font-weight:500;}
+.order-status-card .os-count{font-size:22px;font-weight:700;color:var(--text);}
+.order-status-card .os-komisi{font-size:12px;color:var(--text2);}
+.order-status-card.selesai{border-color:#bbf7d0;background:#f0fdf4;}.order-status-card.selesai .os-count{color:var(--green);}
+.order-status-card.diproses{border-color:#bfdbfe;background:#eff6ff;}.order-status-card.diproses .os-count{color:var(--blue);}
+.order-status-card.dibatalkan{border-color:#fecaca;background:#fef2f2;}.order-status-card.dibatalkan .os-count{color:var(--red);}
+.order-status-card.pending{border-color:#fde68a;background:#fffbeb;}.order-status-card.pending .os-count{color:var(--yellow);}
 /* SEARCHABLE MULTI-SELECT */
 .ms-wrap{position:relative;flex:1;min-width:0;}
 .ms-trigger{display:flex;align-items:center;flex-wrap:wrap;gap:4px;min-height:34px;padding:4px 28px 4px 8px;border:1px solid var(--border);border-radius:8px;background:var(--card);cursor:pointer;position:relative;transition:border-color .15s;}
@@ -263,6 +278,37 @@ tr:hover td{background:#fafafa;}
     <div class="chart-card"><h3>Spend + PPN vs Komisi per Hari</h3><div class="chart-wrap"><canvas id="chart-daily"></canvas></div></div>
     <div class="chart-card"><h3>Net Profit per Hari (setelah PPN)</h3><div class="chart-wrap"><canvas id="chart-profit"></canvas></div></div>
   </div>
+  <!-- TABEL RINCIAN PERFORMA HARIAN -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="section-header" style="margin-bottom:14px">
+      <h3 style="font-size:14px;font-weight:600">&#128197; Tabel Rincian Performa Harian</h3>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Tanggal</th>
+          <th>Shopee Clicks</th>
+          <th>Pesanan</th>
+          <th>Komisi Shopee</th>
+          <th>Ad Spend (+PPN)</th>
+          <th>Profit Bersih</th>
+          <th>ROI</th>
+          <th>ROAS</th>
+        </tr></thead>
+        <tbody id="daily-perf-body"></tbody>
+        <tfoot id="daily-perf-foot"></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- TABEL STATUS PESANAN -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="section-header" style="margin-bottom:14px">
+      <h3 style="font-size:14px;font-weight:600">&#128722; Ringkasan Status Pesanan</h3>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px" id="order-status-grid"></div>
+  </div>
+
   <div class="card">
     <div class="section-header" style="margin-bottom:12px">
       <h3 style="font-size:13px;font-weight:600">Performa per Tag / Kampanye <span style="font-size:11px;font-weight:400;color:var(--text2)">(klik tag untuk detail)</span></h3>
@@ -738,6 +784,134 @@ function renderDashboard(){
   if(chartProfit)chartProfit.destroy();
   chartProfit=new Chart(document.getElementById('chart-profit').getContext('2d'),{type:'bar',data:{labels,datasets:[{label:'Profit',data:daily.map(d=>Math.round(d.profit)),backgroundColor:daily.map(d=>d.profit>=0?'#4ade80':'#f87171'),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false,ticks:{callback:v=>'Rp '+fmt(v),font:{size:10}}},x:{ticks:{font:{size:10}}}}}});
   renderDashTable(ts);
+  renderDailyPerfTable(daily, from, to);
+  renderOrderStatus(from, to);
+}
+
+function renderDailyPerfTable(daily, from, to) {
+  // daily = [{dt, spend, komisi, totalCost, profit}] sorted ascending
+  // We also need shopeeClicks and orders per day
+  const dayClicks = {};
+  rawClicks.forEach(r => {
+    const dt = (r['Waktu Klik']||'').slice(0,10);
+    if (!inRange(dt, from, to)) return;
+    dayClicks[dt] = (dayClicks[dt]||0) + 1;
+  });
+  const dayOrders = {};
+  rawOrders.forEach(r => {
+    if (r['Status Pesanan'] === 'Dibatalkan') return;
+    const dt = (r['Waktu Pemesanan']||'').slice(0,10);
+    if (!inRange(dt, from, to)) return;
+    dayOrders[dt] = (dayOrders[dt]||0) + 1;
+  });
+
+  // Sort descending (newest first) like the image
+  const rows = [...daily].sort((a,b) => b.dt.localeCompare(a.dt));
+
+  if (!rows.length) {
+    document.getElementById('daily-perf-body').innerHTML =
+      '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:20px">Belum ada data</td></tr>';
+    document.getElementById('daily-perf-foot').innerHTML = '';
+    return;
+  }
+
+  // Format date nicely: 2026-04-30 -> 30 Apr 2026
+  function fmtDt(dt) {
+    const d = new Date(dt + 'T00:00:00');
+    return d.toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'});
+  }
+
+  document.getElementById('daily-perf-body').innerHTML = rows.map(r => {
+    const sc = dayClicks[r.dt] || 0;
+    const ord = dayOrders[r.dt] || 0;
+    const roas = r.totalCost > 0 ? r.komisi / r.totalCost : null;
+    const roiStr = r.totalCost > 0 ? (r.profit/r.totalCost*100).toFixed(2)+'%' : '-';
+    const roasStr = roas !== null ? roas.toFixed(2)+'x' : '-';
+    const roasCls = roas !== null ? (roas>=1.5?'cvr-high':roas>=1?'cvr-mid':'cvr-low') : '';
+    const profitCls = r.profit >= 0 ? 'daily-profit-pos' : 'daily-profit-neg';
+    const profitStr = (r.profit >= 0 ? 'Rp ' : '- Rp ') + fmt(Math.abs(r.profit));
+    const roiCls = r.profit >= 0 ? 'cvr-high' : 'cvr-low';
+    return `<tr>
+      <td style="font-weight:500;white-space:nowrap">${fmtDt(r.dt)}</td>
+      <td>${fmt(sc)}</td>
+      <td>${fmt(ord)}</td>
+      <td class="daily-komisi">Rp ${fmt(r.komisi)}</td>
+      <td class="daily-spend">Rp ${fmt(r.totalCost)}</td>
+      <td class="${profitCls}">${profitStr}</td>
+      <td class="${roiCls}">${roiStr}</td>
+      <td class="${roasCls}">${roasStr}</td>
+    </tr>`;
+  }).join('');
+
+  // Footer totals
+  const totSc = rows.reduce((s,r) => s + (dayClicks[r.dt]||0), 0);
+  const totOrd = rows.reduce((s,r) => s + (dayOrders[r.dt]||0), 0);
+  const totKomisi = rows.reduce((s,r) => s + r.komisi, 0);
+  const totCost = rows.reduce((s,r) => s + r.totalCost, 0);
+  const totProfit = rows.reduce((s,r) => s + r.profit, 0);
+  const totRoi = totCost > 0 ? (totProfit/totCost*100).toFixed(2)+'%' : '-';
+  const totRoas = totCost > 0 ? (totKomisi/totCost).toFixed(2)+'x' : '-';
+  const totRoasCls = totCost > 0 ? (totKomisi/totCost>=1.5?'cvr-high':totKomisi/totCost>=1?'cvr-mid':'cvr-low') : '';
+  const totProfitCls = totProfit >= 0 ? 'daily-profit-pos' : 'daily-profit-neg';
+  const totProfitStr = (totProfit >= 0 ? 'Rp ' : '- Rp ') + fmt(Math.abs(totProfit));
+  const totRoiCls = totProfit >= 0 ? 'cvr-high' : 'cvr-low';
+  document.getElementById('daily-perf-foot').innerHTML = `<tr>
+    <td>TOTAL (${rows.length} hari)</td>
+    <td>${fmt(totSc)}</td>
+    <td>${fmt(totOrd)}</td>
+    <td class="daily-komisi">Rp ${fmt(totKomisi)}</td>
+    <td class="daily-spend">Rp ${fmt(totCost)}</td>
+    <td class="${totProfitCls}">${totProfitStr}</td>
+    <td class="${totRoiCls}">${totRoi}</td>
+    <td class="${totRoasCls}">${totRoas}</td>
+  </tr>`;
+}
+
+function renderOrderStatus(from, to) {
+  // Count all orders by status
+  const statusMap = {};
+  const komisiMap = {};
+  rawOrders.forEach(r => {
+    const dt = (r['Waktu Pemesanan']||'').slice(0,10);
+    if (!inRange(dt, from, to)) return;
+    const st = r['Status Pesanan'] || 'Tidak Diketahui';
+    statusMap[st] = (statusMap[st]||0) + 1;
+    komisiMap[st] = (komisiMap[st]||0) + parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);
+  });
+
+  // Define display order and color class
+  const statusConfig = [
+    { key:'Selesai',       label:'Selesai',         cls:'selesai',    icon:'✅' },
+    { key:'Diproses',      label:'Diproses',         cls:'diproses',   icon:'🔄' },
+    { key:'Dikirim',       label:'Dikirim',          cls:'diproses',   icon:'🚚' },
+    { key:'Belum Bayar',   label:'Belum Bayar',      cls:'pending',    icon:'⏳' },
+    { key:'Dibatalkan',    label:'Dibatalkan',       cls:'dibatalkan', icon:'❌' },
+    { key:'Pengembalian',  label:'Pengembalian',     cls:'dibatalkan', icon:'↩️' },
+  ];
+
+  // Collect known statuses first, then any others
+  const known = statusConfig.map(s => s.key);
+  const others = Object.keys(statusMap).filter(k => !known.includes(k));
+  const allConfigs = [
+    ...statusConfig.filter(s => statusMap[s.key] !== undefined),
+    ...others.map(k => ({ key:k, label:k, cls:'pending', icon:'📦' }))
+  ];
+
+  if (!allConfigs.length) {
+    document.getElementById('order-status-grid').innerHTML =
+      '<p style="font-size:13px;color:var(--text3)">Belum ada data pesanan.</p>';
+    return;
+  }
+
+  document.getElementById('order-status-grid').innerHTML = allConfigs.map(cfg => {
+    const count = statusMap[cfg.key] || 0;
+    const komisi = komisiMap[cfg.key] || 0;
+    return `<div class="order-status-card ${cfg.cls}">
+      <div class="os-label">${cfg.icon} ${cfg.label}</div>
+      <div class="os-count">${fmt(count)} pesanan</div>
+      <div class="os-komisi">Komisi: Rp ${fmt(komisi)}</div>
+    </div>`;
+  }).join('');
 }
 function renderDashTable(ts){
   if(!ts){const{from,to}=getDateRange();ts=computeTagStats(from,to);}
