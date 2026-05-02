@@ -554,7 +554,33 @@ function checkLoaded(){
 // ============================================================
 // MAPPING DATA
 // ============================================================
-function getUniqueTags(){const s=new Set();rawOrders.forEach(r=>{const t=(r['Tag_link1']||'').trim();if(t&&t!=='Ada')s.add(t);});return[...s].sort();}
+function getUniqueTags(){
+  const activity={};
+  // dari orders (hanya yang ada komisi)
+  rawOrders.forEach(r=>{
+    const t=(r['Tag_link1']||'').trim(); if(!t||t==='Ada') return;
+    if(!activity[t]) activity[t]={komisi:0,clicks:0};
+    if(r['Status Pesanan']!=='Dibatalkan'){
+      activity[t].komisi += parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);
+    }
+  });
+  // dari klik shopee
+  rawClicks.forEach(r=>{
+    const t=extractBaseTag(r['Tag_link']||''); if(!t) return;
+    if(!activity[t]) activity[t]={komisi:0,clicks:0};
+    activity[t].clicks++;
+  });
+  // filter hanya yang aktif
+  const s=new Set();
+  Object.entries(activity).forEach(([t,a])=>{
+    if(a.komisi>0 || a.clicks>0) s.add(t);
+  });
+  // fallback kalau semua kosong (biar tidak blank)
+  if(s.size===0){
+    rawOrders.forEach(r=>{const t=(r['Tag_link1']||'').trim();if(t&&t!=='Ada') s.add(t);});
+  }
+  return [...s].sort();
+}
 function getUniqueCampaigns(){return[...new Set(rawMeta.map(r=>r['campaign_name']).filter(Boolean))].sort();}
 function extractBaseTag(raw){if(!raw)return'';return raw.replace(/[-–]+$/,'').replace(/-[Ff]acebook.*$/i,'').replace(/[-–]+$/,'').trim();}
 function doAutoMapping(){
