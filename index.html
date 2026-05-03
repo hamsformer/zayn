@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shopee Affiliate Tracker By @Hamziyadd — Data-Rich Pro</title>
+<title>Shopee Affiliate Tracker By @Hamziyadd</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -32,81 +32,102 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;}
+/* Subtle grid background */
 body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 20% 20%,rgba(124,58,237,.06) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(59,130,246,.06) 0%,transparent 50%);pointer-events:none;z-index:0;}
+
+/* NAV */
 .nav{background:rgba(15,17,23,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);color:#fff;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:200;gap:12px;}
 .nav-brand{font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px;white-space:nowrap;letter-spacing:-.3px;}
-.nav-brand.dot{width:28px;height:28px;border-radius:8px;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;box-shadow:var(--glow-purple);}
+.nav-brand .dot{width:28px;height:28px;border-radius:8px;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;box-shadow:var(--glow-purple);}
 .nav-tabs{display:flex;gap:2px;flex-wrap:wrap;}
-.nav-tab{padding:6px 13px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);transition:all.2s;border:none;background:none;white-space:nowrap;letter-spacing:.1px;}
+.nav-tab{padding:6px 13px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);transition:all .2s;border:none;background:none;white-space:nowrap;letter-spacing:.1px;}
 .nav-tab:hover{background:rgba(255,255,255,.06);color:var(--text);}
 .nav-tab.active{background:linear-gradient(135deg,rgba(124,58,237,.25),rgba(59,130,246,.2));color:#fff;box-shadow:inset 0 0 0 1px rgba(124,58,237,.3);}
+
+/* PPN BAR */
 .ppn-bar{background:rgba(22,27,39,.9);border-bottom:1px solid var(--border);padding:8px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
 .ppn-bar label{font-size:12px;color:var(--text2);white-space:nowrap;font-weight:500;}
 .ppn-bar input[type=number]{width:64px;padding:4px 8px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:13px;font-family:inherit;}
 .ppn-bar input[type=number]:focus{outline:none;border-color:var(--accent2);box-shadow:0 0 0 2px rgba(124,58,237,.2);}
 .ppn-presets{display:flex;gap:4px;}
-.ppn-preset{padding:3px 9px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--text2);font-size:11px;font-weight:500;cursor:pointer;transition:all.15s;font-family:inherit;}
+.ppn-preset{padding:3px 9px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--text2);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s;font-family:inherit;}
 .ppn-preset:hover{border-color:var(--accent2);color:var(--accent2);}
 .ppn-preset.active{background:rgba(124,58,237,.2);color:#c4b5fd;border-color:#7c3aed;box-shadow:var(--glow-purple);}
 .ppn-indicator{font-size:12px;color:#a78bfa;font-weight:500;}
+
+/* PAGES */
 .page{display:none;padding:28px 24px;max-width:1440px;margin:0 auto;position:relative;z-index:1;}
 .page.active{display:block;}
+
+/* UPLOAD CARDS */
 .upload-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:24px;}
-.upload-card{background:var(--card);border:1.5px dashed var(--border);border-radius:16px;padding:28px 24px;text-align:center;transition:all.25s;cursor:pointer;position:relative;overflow:hidden;}
-.upload-card::before{content:'';position:absolute;inset:0;background:var(--g1);opacity:0;transition:opacity.25s;}
+.upload-card{background:var(--card);border:1.5px dashed var(--border);border-radius:16px;padding:28px 24px;text-align:center;transition:all .25s;cursor:pointer;position:relative;overflow:hidden;}
+.upload-card::before{content:'';position:absolute;inset:0;background:var(--g1);opacity:0;transition:opacity .25s;}
 .upload-card:hover{border-color:var(--accent2);transform:translateY(-2px);box-shadow:var(--shadow),var(--glow-purple);}
 .upload-card:hover::before{opacity:.04;}
 .upload-card.loaded{border-color:var(--green);border-style:solid;background:linear-gradient(135deg,rgba(16,185,129,.08),rgba(16,185,129,.04));}
 .upload-card.error{border-color:var(--red);border-style:solid;background:var(--red-light);}
 .upload-card h3{font-size:14px;font-weight:600;margin-bottom:5px;color:var(--text);}
 .upload-card p{font-size:12px;color:var(--text2);margin-bottom:18px;line-height:1.6;}
-.upload-card.icon{font-size:32px;margin-bottom:12px;display:block;}
-.upload-card.status{font-size:12px;font-weight:600;margin-top:10px;}
-.upload-card.loaded.status{color:var(--green);}
-.upload-card.error.status{color:var(--red);}
+.upload-card .icon{font-size:32px;margin-bottom:12px;display:block;}
+.upload-card .status{font-size:12px;font-weight:600;margin-top:10px;}
+.upload-card.loaded .status{color:var(--green);}
+.upload-card.error .status{color:var(--red);}
 input[type=file]{display:none;}
-.btn{padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--card2);color:var(--text);cursor:pointer;font-size:13px;font-weight:500;transition:all.15s;font-family:inherit;}
+
+/* BUTTONS */
+.btn{padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--card2);color:var(--text);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;font-family:inherit;}
 .btn:hover{border-color:var(--accent2);color:var(--accent2);}
 .btn-primary{background:var(--g1);color:#fff;border:none;box-shadow:var(--glow-purple);}
 .btn-primary:hover{opacity:.88;color:#fff;transform:translateY(-1px);}
 .btn-sm{padding:5px 11px;font-size:12px;border-radius:7px;}
 .btn-ghost{background:none;border-color:transparent;color:var(--text2);}
 .btn-ghost:hover{background:rgba(255,255,255,.05);border-color:var(--border);color:var(--text);}
+
+/* LAYOUT */
 .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px;}
 .section-title{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.3px;}
+
+/* CARDS */
 .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;box-shadow:var(--shadow);}
 .card-mb{margin-bottom:18px;}
+
+/* METRIC GRID - Rich cards with gradient accents */
 .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:22px;}
-.metric{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 16px;position:relative;overflow:hidden;transition:all.2s;}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 16px;position:relative;overflow:hidden;transition:all .2s;}
 .metric::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;}
 .metric:hover{transform:translateY(-2px);box-shadow:var(--shadow);}
-.metric.label{font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
-.metric.value{font-size:22px;font-weight:800;color:var(--text);line-height:1.1;letter-spacing:-.5px;}
-.metric.sub{font-size:11px;color:var(--text2);margin-top:5px;}
-.metric.metric-ring{position:absolute;right:12px;top:12px;width:34px;height:34px;opacity:.7}
+.metric .label{font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.metric .value{font-size:22px;font-weight:800;color:var(--text);line-height:1.1;letter-spacing:-.5px;}
+.metric .sub{font-size:11px;color:var(--text2);margin-top:5px;}
+.metric .metric-icon{position:absolute;right:14px;top:14px;font-size:20px;opacity:.35;}
 .metric.green{background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(16,185,129,.05));border-color:rgba(16,185,129,.25);}
 .metric.green::after{background:var(--green);}
-.metric.green.value{color:#34d399;}
+.metric.green .value{color:#34d399;}
 .metric.red{background:linear-gradient(135deg,rgba(239,68,68,.12),rgba(239,68,68,.05));border-color:rgba(239,68,68,.25);}
 .metric.red::after{background:var(--red);}
-.metric.red.value{color:#f87171;}
+.metric.red .value{color:#f87171;}
 .metric.blue{background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(59,130,246,.05));border-color:rgba(59,130,246,.25);}
 .metric.blue::after{background:var(--blue);}
-.metric.blue.value{color:#60a5fa;}
+.metric.blue .value{color:#60a5fa;}
 .metric.purple{background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.05));border-color:rgba(124,58,237,.3);}
 .metric.purple::after{background:var(--accent);}
-.metric.purple.value{color:#a78bfa;}
+.metric.purple .value{color:#a78bfa;}
 .metric.yellow{background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(245,158,11,.05));border-color:rgba(245,158,11,.25);}
 .metric.yellow::after{background:var(--yellow);}
-.metric.yellow.value{color:#fbbf24;}
+.metric.yellow .value{color:#fbbf24;}
+
+/* FILTERS */
 .filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .filter-bar label{font-size:12px;font-weight:500;color:var(--text2);}
 .filter-bar select,.filter-bar input[type=date]{padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card2);color:var(--text);font-size:13px;font-family:inherit;}
 .filter-bar select:focus,.filter-bar input[type=date]:focus{outline:none;border-color:var(--accent2);}
 .date-presets{display:flex;gap:3px;}
-.date-preset{padding:5px 10px;border:1px solid var(--border);border-radius:7px;background:var(--card2);cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);transition:all.15s;font-family:inherit;}
+.date-preset{padding:5px 10px;border:1px solid var(--border);border-radius:7px;background:var(--card2);cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);transition:all .15s;font-family:inherit;}
 .date-preset:hover{border-color:var(--accent2);color:var(--accent2);}
 .date-preset.active{background:linear-gradient(135deg,rgba(124,58,237,.3),rgba(59,130,246,.2));color:#c4b5fd;border-color:rgba(124,58,237,.5);}
+
+/* TABLES */
 .table-wrap{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;font-size:12px;}
 th{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);white-space:nowrap;background:rgba(255,255,255,.02);}
@@ -114,26 +135,38 @@ td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);vertical-alig
 tr:last-child td{border-bottom:none;}
 tr:hover td{background:rgba(255,255,255,.03);}
 tfoot tr td{font-weight:700;background:rgba(124,58,237,.08);border-top:1px solid rgba(124,58,237,.2);color:var(--text);}
+
+/* BADGES */
 .badge{display:inline-block;padding:3px 8px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:.2px;}
 .badge-profit{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.2);}
 .badge-loss{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.2);}
 .badge-break{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.2);}
 .badge-pending{background:rgba(255,255,255,.06);color:var(--text2);border:1px solid var(--border);}
+
+/* CVR colors */
 .cvr-high{color:#34d399;font-weight:600;}
 .cvr-mid{color:#fbbf24;font-weight:600;}
 .cvr-low{color:#f87171;font-weight:600;}
+
+/* Row highlights */
 tr.row-profit td{background:rgba(16,185,129,.05)!important;}
 tr.row-loss td{background:rgba(239,68,68,.05)!important;}
+
+/* TAG BADGE */
 .tag-badge{display:inline-block;padding:3px 10px;background:rgba(124,58,237,.2);color:#c4b5fd;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap;border:1px solid rgba(124,58,237,.3);}
-.tag-badge-btn{cursor:pointer;transition:all.15s;}
+.tag-badge-btn{cursor:pointer;transition:all .15s;}
 .tag-badge-btn:hover{background:rgba(124,58,237,.35);transform:scale(1.04);}
 .arrow{color:var(--text3);font-size:13px;flex-shrink:0;margin-top:9px;}
+
+/* CHARTS */
 .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px;}
 @media(max-width:900px){.chart-grid{grid-template-columns:1fr;}}
 .chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow);}
 .chart-card h3{font-size:13px;font-weight:600;margin-bottom:16px;color:var(--text2);display:flex;align-items:center;gap:6px;}
 .chart-card h3::before{content:'';width:4px;height:14px;border-radius:99px;background:var(--g1);display:inline-block;}
 .chart-wrap{position:relative;height:215px;}
+
+/* MISC */
 .info-box{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);border-radius:12px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#93c5fd;line-height:1.7;}
 .warn-box{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#fcd34d;line-height:1.7;}
 .search-input{padding:7px 12px;border:1px solid var(--border);border-radius:9px;font-size:13px;background:var(--card2);color:var(--text);font-family:inherit;}
@@ -141,19 +174,23 @@ tr.row-loss td{background:rgba(239,68,68,.05)!important;}
 .tag-search-wrap{margin-bottom:14px;}
 .tag-search-wrap input{width:100%;}
 .camp-pill{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:7px;padding:3px 10px;font-size:11px;color:var(--text2);}
+
+/* MAPPING */
 .mapping-container{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
 @media(max-width:768px){.mapping-container{grid-template-columns:1fr;}}
 .mapping-list{max-height:560px;overflow-y:auto;padding-right:4px;}
 .mapping-item{display:flex;align-items:flex-start;gap:8px;padding:10px 0;border-bottom:1px solid var(--border);}
 .mapping-item:last-child{border-bottom:none;}
+
+/* MULTI-SELECT */
 .ms-wrap{position:relative;flex:1;min-width:0;}
-.ms-trigger{display:flex;align-items:center;flex-wrap:wrap;gap:4px;min-height:36px;padding:4px 28px 4px 8px;border:1px solid var(--border);border-radius:9px;background:var(--card2);cursor:pointer;position:relative;transition:all.15s;}
+.ms-trigger{display:flex;align-items:center;flex-wrap:wrap;gap:4px;min-height:36px;padding:4px 28px 4px 8px;border:1px solid var(--border);border-radius:9px;background:var(--card2);cursor:pointer;position:relative;transition:all .15s;}
 .ms-trigger:hover{border-color:var(--accent2);}
 .ms-trigger.open{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,.15);}
-.ms-trigger.ms-placeholder{font-size:12px;color:var(--text3);}
-.ms-trigger.ms-chip{display:inline-flex;align-items:center;gap:3px;background:rgba(124,58,237,.2);color:#c4b5fd;border-radius:5px;padding:2px 7px;font-size:11px;font-weight:500;border:1px solid rgba(124,58,237,.3);}
-.ms-trigger.ms-chip.ms-chip-x{cursor:pointer;font-size:10px;opacity:.6;margin-left:2px;}
-.ms-trigger.ms-chip.ms-chip-x:hover{opacity:1;}
+.ms-trigger .ms-placeholder{font-size:12px;color:var(--text3);}
+.ms-trigger .ms-chip{display:inline-flex;align-items:center;gap:3px;background:rgba(124,58,237,.2);color:#c4b5fd;border-radius:5px;padding:2px 7px;font-size:11px;font-weight:500;border:1px solid rgba(124,58,237,.3);}
+.ms-trigger .ms-chip .ms-chip-x{cursor:pointer;font-size:10px;opacity:.6;margin-left:2px;}
+.ms-trigger .ms-chip .ms-chip-x:hover{opacity:1;}
 .ms-caret{position:absolute;right:9px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:10px;pointer-events:none;}
 .ms-panel{display:none;position:absolute;top:calc(100% + 5px);left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:12px;z-index:999;box-shadow:0 16px 48px rgba(0,0,0,.5);overflow:hidden;min-width:260px;}
 .ms-panel.open{display:block;}
@@ -161,38 +198,44 @@ tr.row-loss td{background:rgba(239,68,68,.05)!important;}
 .ms-search{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;background:var(--bg2);color:var(--text);outline:none;font-family:inherit;}
 .ms-search:focus{border-color:var(--accent2);}
 .ms-options{max-height:220px;overflow-y:auto;}
-.ms-option{display:flex;align-items:center;gap:9px;padding:8px 12px;cursor:pointer;font-size:12px;transition:background.1s;color:var(--text);}
+.ms-option{display:flex;align-items:center;gap:9px;padding:8px 12px;cursor:pointer;font-size:12px;transition:background .1s;color:var(--text);}
 .ms-option:hover{background:rgba(124,58,237,.1);}
 .ms-option.selected{background:rgba(124,58,237,.12);}
 .ms-option input[type=checkbox]{accent-color:var(--accent2);flex-shrink:0;}
 .ms-option-label{flex:1;line-height:1.3;}
 .ms-empty{padding:14px 12px;font-size:12px;color:var(--text3);text-align:center;}
 .ms-footer{padding:8px 10px;border-top:1px solid var(--border);display:flex;gap:6px;justify-content:flex-end;}
+
+/* DAILY PERF TABLE */
 .daily-profit-pos{color:#34d399;font-weight:700;}
 .daily-profit-neg{color:#f87171;font-weight:700;}
 .daily-komisi{color:#fbbf24;font-weight:600;}
 .daily-spend{color:#60a5fa;font-weight:600;}
-.order-status-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden;transition:transform.2s;}
+
+/* ORDER STATUS CARDS */
+.order-status-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden;transition:transform .2s;}
 .order-status-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
 .order-status-card:hover{transform:translateY(-2px);}
-.order-status-card.os-label{font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
-.order-status-card.os-count{font-size:24px;font-weight:800;letter-spacing:-.5px;}
-.order-status-card.os-komisi{font-size:12px;color:var(--text2);}
-.order-status-card.selesai{border-color:rgba(16,185,129,.3);background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(16,185,129,.04));}.order-status-card.selesai::before{background:var(--green);}.order-status-card.selesai.os-count{color:#34d399;}
-.order-status-card.diproses{border-color:rgba(59,130,246,.3);background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(59,130,246,.04));}.order-status-card.diproses::before{background:var(--blue);}.order-status-card.diproses.os-count{color:#60a5fa;}
-.order-status-card.dibatalkan{border-color:rgba(239,68,68,.3);background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(239,68,68,.04));}.order-status-card.dibatalkan::before{background:var(--red);}.order-status-card.dibatalkan.os-count{color:#f87171;}
-.order-status-card.pending{border-color:rgba(245,158,11,.3);background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(245,158,11,.04));}.order-status-card.pending::before{background:var(--yellow);}.order-status-card.pending.os-count{color:#fbbf24;}
+.order-status-card .os-label{font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
+.order-status-card .os-count{font-size:24px;font-weight:800;letter-spacing:-.5px;}
+.order-status-card .os-komisi{font-size:12px;color:var(--text2);}
+.order-status-card.selesai{border-color:rgba(16,185,129,.3);background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(16,185,129,.04));}.order-status-card.selesai::before{background:var(--green);}.order-status-card.selesai .os-count{color:#34d399;}
+.order-status-card.diproses{border-color:rgba(59,130,246,.3);background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(59,130,246,.04));}.order-status-card.diproses::before{background:var(--blue);}.order-status-card.diproses .os-count{color:#60a5fa;}
+.order-status-card.dibatalkan{border-color:rgba(239,68,68,.3);background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(239,68,68,.04));}.order-status-card.dibatalkan::before{background:var(--red);}.order-status-card.dibatalkan .os-count{color:#f87171;}
+.order-status-card.pending{border-color:rgba(245,158,11,.3);background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(245,158,11,.04));}.order-status-card.pending::before{background:var(--yellow);}.order-status-card.pending .os-count{color:#fbbf24;}
+
+/* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;backdrop-filter:blur(8px);}
 .modal-overlay.hidden{display:none;}
-.modal{background:var(--card);border:1px solid var(--border);border-radius:20px;width:100%;max-width:1000px;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:modalIn.22s cubic-bezier(.22,1,.36,1);}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px;width:100%;max-width:1000px;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:modalIn .22s cubic-bezier(.22,1,.36,1);}
 @keyframes modalIn{from{opacity:0;transform:translateY(-20px) scale(.97);}to{opacity:1;transform:none;}}
 .modal-header{display:flex;align-items:center;justify-content:space-between;padding:22px 26px 18px;border-bottom:1px solid var(--border);}
 .modal-header-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.modal-close{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--card2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all.15s;flex-shrink:0;}
-.modal-close:hover{background:rgba(239,68,.15);border-color:var(--red);color:var(--red);}
+.modal-close{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--card2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:all .15s;flex-shrink:0;}
+.modal-close:hover{background:rgba(239,68,68,.15);border-color:var(--red);color:var(--red);}
 .modal-body{padding:22px 26px;}
 .modal-presets{display:flex;gap:4px;flex-wrap:wrap;}
-.modal-preset{padding:5px 11px;border:1px solid var(--border);border-radius:7px;background:var(--card2);cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);transition:all.15s;font-family:inherit;}
+.modal-preset{padding:5px 11px;border:1px solid var(--border);border-radius:7px;background:var(--card2);cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);transition:all .15s;font-family:inherit;}
 .modal-preset.active{background:linear-gradient(135deg,rgba(124,58,237,.3),rgba(59,130,246,.2));color:#c4b5fd;border-color:rgba(124,58,237,.5);}
 .modal-date-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .modal-date-row input[type=date]{padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card2);color:var(--text);font-size:13px;font-family:inherit;}
@@ -204,14 +247,16 @@ tr.row-loss td{background:rgba(239,68,68,.05)!important;}
 .modal-chart-wrap{position:relative;height:190px;}
 .modal-table-wrap{overflow-x:auto;max-height:300px;overflow-y:auto;}
 .modal-table-wrap table{font-size:12px;}
-.alert-banner{border-radius:14px;padding:18px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:16px;border:1px solid;transition:transform.2s;}
+
+/* ALERT */
+.alert-banner{border-radius:14px;padding:18px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:16px;border:1px solid;transition:transform .2s;}
 .alert-banner:hover{transform:translateX(4px);}
 .alert-banner.loss{background:linear-gradient(135deg,rgba(239,68,68,.12),rgba(239,68,68,.05));border-color:rgba(239,68,68,.3);}
 .alert-banner.warn{background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(245,158,11,.05));border-color:rgba(245,158,11,.3);}
 .alert-icon{font-size:24px;flex-shrink:0;margin-top:2px;}
 .alert-title{font-size:14px;font-weight:700;margin-bottom:4px;letter-spacing:-.2px;}
-.alert-banner.loss.alert-title{color:#f87171;}
-.alert-banner.warn.alert-title{color:#fbbf24;}
+.alert-banner.loss .alert-title{color:#f87171;}
+.alert-banner.warn .alert-title{color:#fbbf24;}
 .alert-sub{font-size:12px;color:var(--text2);line-height:1.7;}
 .alert-days{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;}
 .alert-day-chip{font-size:11px;padding:2px 8px;border-radius:99px;background:rgba(239,68,68,.2);color:#f87171;font-weight:600;border:1px solid rgba(239,68,68,.2);}
@@ -219,11 +264,13 @@ tr.row-loss td{background:rgba(239,68,68,.05)!important;}
 .alert-controls label{font-size:13px;font-weight:500;color:var(--text);}
 .alert-controls input[type=number]{width:70px;padding:6px 9px;border:1px solid var(--border);border-radius:8px;background:var(--card2);color:var(--text);font-size:13px;font-family:inherit;}
 .no-alert{text-align:center;padding:60px 24px;color:var(--text2);}
-.no-alert.ico{font-size:48px;margin-bottom:14px;display:block;}
+.no-alert .ico{font-size:48px;margin-bottom:14px;display:block;}
+
+/* HOURLY */
 .heatmap-wrap{overflow-x:auto;border-radius:10px;}
 .heatmap{border-collapse:separate;border-spacing:2px;font-size:11px;min-width:700px;}
 .heatmap th{padding:5px 8px;color:var(--text3);font-weight:600;text-align:center;font-size:10px;background:none;border:none;}
-.heatmap td{padding:7px 5px;text-align:center;border-radius:6px;cursor:default;min-width:38px;transition:transform.1s;border:none;}
+.heatmap td{padding:7px 5px;text-align:center;border-radius:6px;cursor:default;min-width:38px;transition:transform .1s;border:none;}
 .heatmap td:hover{transform:scale(1.15);z-index:10;position:relative;}
 .hm-0{background:rgba(255,255,255,.03);color:var(--text3);}
 .hm-1{background:rgba(16,185,129,.12);color:#6ee7b7;}
@@ -239,9 +286,11 @@ tr.row-loss td{background:rgba(239,68,68,.05)!important;}
 .hour-card:nth-child(4)::after{background:var(--g4);}
 .hour-card:nth-child(5)::after{background:var(--g3);}
 .hour-card:nth-child(6)::after{background:var(--g1);}
-.hour-card.hc-label{font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
-.hour-card.hc-val{font-size:20px;font-weight:800;letter-spacing:-.5px;}
-.hour-card.hc-sub{font-size:11px;color:var(--text2);margin-top:4px;}
+.hour-card .hc-label{font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.hour-card .hc-val{font-size:20px;font-weight:800;letter-spacing:-.5px;}
+.hour-card .hc-sub{font-size:11px;color:var(--text2);margin-top:4px;}
+
+/* PRODUCTS */
 .prod-filter{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px;}
 .prod-filter select,.prod-filter input{padding:7px 11px;border:1px solid var(--border);border-radius:9px;font-size:13px;background:var(--card2);color:var(--text);font-family:inherit;}
 .prod-filter select:focus,.prod-filter input:focus{outline:none;border-color:var(--accent2);}
@@ -250,10 +299,48 @@ tr.row-loss td{background:rgba(239,68,68,.05)!important;}
 .prod-rank.silver{background:linear-gradient(135deg,#9ca3af,#d1d5db);color:#1f2937;}
 .prod-rank.bronze{background:linear-gradient(135deg,#b45309,#d97706);color:#fff;}
 .prod-rank.other{background:rgba(255,255,255,.08);color:var(--text2);}
-.spark-mini{height:26px;margin-top:8px;opacity:.8}
+padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14px;}
+.alert-banner.loss{background:rgba(239,68,68,.07);border:1.5px solid #fca5a5;}
+.alert-banner.warn{background:#fffbeb;border:1.5px solid #fde68a;}
+.alert-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.alert-title{font-size:14px;font-weight:700;margin-bottom:3px;}
+.alert-banner.loss .alert-title{color:#dc2626;}
+.alert-banner.warn .alert-title{color:#d97706;}
+.alert-sub{font-size:12px;color:var(--text2);line-height:1.6;}
+.alert-days{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.alert-day-chip{font-size:11px;padding:2px 7px;border-radius:99px;background:#fee2e2;color:#dc2626;font-weight:600;}
+.alert-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:10px;}
+.alert-controls label{font-size:13px;font-weight:500;}
+.alert-controls input[type=number]{width:70px;padding:5px 9px;border:1px solid var(--border);border-radius:7px;font-size:13px;}
+.no-alert{text-align:center;padding:48px 24px;color:var(--text2);}
+.no-alert .ico{font-size:40px;margin-bottom:12px;}
+/* HOURLY */
+.heatmap-wrap{overflow-x:auto;}
+.heatmap{border-collapse:collapse;font-size:11px;min-width:700px;}
+.heatmap th{padding:5px 7px;color:var(--text2);font-weight:600;text-align:center;font-size:10px;}
+.heatmap td{padding:6px 5px;text-align:center;border-radius:4px;cursor:default;min-width:38px;}
+.hm-0{background:#f9fafb;color:var(--text3);}
+.hm-1{background:#dcfce7;color:#166534;}
+.hm-2{background:#86efac;color:#14532d;}
+.hm-3{background:#22c55e;color:#fff;}
+.hm-4{background:#15803d;color:#fff;font-weight:700;}
+.hm-loss{background:#fee2e2;color:#dc2626;}
+.hour-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px;}
+.hour-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center;}
+.hour-card .hc-label{font-size:11px;color:var(--text2);margin-bottom:4px;}
+.hour-card .hc-val{font-size:18px;font-weight:700;}
+.hour-card .hc-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+/* PRODUCTS */
+.prod-filter{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
+.prod-filter select,.prod-filter input{padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--card);}
+.prod-rank{display:inline-block;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;text-align:center;line-height:24px;flex-shrink:0;}
+.prod-rank.gold{background:#f59e0b;}
+.prod-rank.silver{background:#9ca3af;}
+.prod-rank.bronze{background:#b45309;}
 </style>
 </head>
 <body>
+
 <nav class="nav">
   <div class="nav-brand"><div class="dot">📊</div> Shopee Affiliate Tracker by @Hamziyadd</div>
   <div class="nav-tabs">
@@ -282,6 +369,7 @@ tr.row-loss td{background:rgba(239,68,68,.05)!important;}
   <span class="ppn-indicator" id="ppn-indicator"></span>
 </div>
 
+<!-- UPLOAD -->
 <div id="page-upload" class="page active">
   <div class="section-header" style="margin-bottom:18px">
     <div><div class="section-title">Upload Laporan CSV</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Upload 3 file laporan dari Meta Ads dan Shopee Affiliate</div></div>
@@ -310,32 +398,44 @@ tr.row-loss td{background:rgba(239,68,68,.05)!important;}
     </div>
   </div>
   <div id="upload-ready-box" style="display:none" class="info-box">✅ Semua file berhasil diupload! Pergi ke <strong>Mapping Iklan</strong> untuk menghubungkan Tag Shopee dengan kampanye Meta Ads.</div>
+  <div class="card">
+    <h3 style="font-size:13px;font-weight:600;margin-bottom:12px">Keterangan Kolom CSV</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;font-size:12px;">
+      <div><div style="font-weight:600;margin-bottom:6px;color:var(--accent)">Meta Ads <span style="font-size:10px;background:#dcfce7;color:#15803d;padding:1px 6px;border-radius:99px">EN & ID</span></div><div style="color:var(--text2);line-height:1.9">• Campaign name / <em>Nama kampanye</em><br>• Amount spent (IDR) / <em>Jumlah yang dibelanjakan (IDR)</em><br>• Unique link clicks / <em>Klik tautan unik</em><br>• Results / <em>Hasil</em><br>• Reporting starts / <em>Tanggal mulai pelaporan</em></div></div>
+      <div><div style="font-weight:600;margin-bottom:6px;color:var(--accent)">Shopee Komisi</div><div style="color:var(--text2);line-height:1.9">• Tag_link1<br>• Komisi Bersih Affiliate (Rp)<br>• Status Pesanan<br>• Waktu Pemesanan<br>• Nilai Pembelian (Rp)</div></div>
+      <div><div style="font-weight:600;margin-bottom:6px;color:var(--accent)">Shopee Klik</div><div style="color:var(--text2);line-height:1.9">• Tag_link<br>• Waktu Klik<br>• Wilayah Klik<br>• Perujuk</div></div>
+    </div>
+  </div>
 </div>
 
+<!-- MAPPING -->
 <div id="page-mapping" class="page">
   <div class="section-header">
-    <div><div class="section-title">Mapping Tag Shopee → Kampanye Meta Ads</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Satu tag bisa di-assign ke banyak kampanye.</div></div>
+    <div><div class="section-title">Mapping Tag Shopee → Kampanye Meta Ads</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Satu tag bisa di-assign ke banyak kampanye. Gunakan kotak cari di dropdown untuk menemukan kampanye lebih cepat.</div></div>
     <div style="display:flex;gap:8px">
       <button class="btn btn-sm" onclick="doAutoMapping()">⚡ Auto-Map</button>
       <button class="btn btn-sm" onclick="clearAllMapping()">🗑 Hapus Semua</button>
       <button class="btn btn-primary btn-sm" onclick="saveMapping()">💾 Simpan</button>
     </div>
   </div>
-  <div class="info-box" id="mapping-info">Upload semua file CSV terlebih dahulu.</div>
-  <div class="warn-box" id="mapping-warn" style="display:none">⚠️ Klik <strong>⚡ Auto-Map</strong> untuk mapping otomatis.</div>
+  <div class="info-box" id="mapping-info">Upload semua file CSV terlebih dahulu di tab Upload Data.</div>
+  <div class="warn-box" id="mapping-warn" style="display:none">⚠️ <strong>Auto-Map tidak aktif otomatis.</strong> Klik <strong>⚡ Auto-Map</strong> untuk mencoba mapping berdasarkan kesamaan nama, atau lakukan mapping manual.</div>
   <div class="mapping-container" id="mapping-body" style="display:none">
     <div class="card">
       <h3 style="font-size:13px;font-weight:600;margin-bottom:4px">Tag Shopee</h3>
-      <div class="tag-search-wrap"><input class="search-input" placeholder="🔍 Cari tag..." id="search-tags" oninput="renderMappingList()"></div>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Pilih satu atau lebih kampanye Meta untuk setiap tag.</p>
+      <div class="tag-search-wrap"><input class="search-input" placeholder="🔍 Cari tag Shopee..." id="search-tags" oninput="renderMappingList()"></div>
       <div class="mapping-list" id="mapping-list"></div>
     </div>
     <div class="card">
       <h3 style="font-size:13px;font-weight:600;margin-bottom:4px">Ringkasan Mapping</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Preview mapping aktif.</p>
       <div id="mapping-summary"></div>
     </div>
   </div>
 </div>
 
+<!-- DASHBOARD -->
 <div id="page-dashboard" class="page">
   <div class="section-header">
     <div class="section-title">Dashboard Overview</div>
@@ -351,151 +451,1281 @@ tr.row-loss td{background:rgba(239,68,68,.05)!important;}
       <input type="date" id="date-to" onchange="renderDashboard()">
     </div>
   </div>
-
-  <!-- WATERFALL BARU -->
-  <div class="card card-mb" id="waterfall-card" style="display:none">
-    <h3 style="font-size:13px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px">💧 Profit Waterfall</h3>
-    <div style="height:160px"><canvas id="chart-waterfall"></canvas></div>
-  </div>
-
   <div class="metric-grid" id="dash-metrics"></div>
-
   <div class="chart-grid">
     <div class="chart-card"><h3>Spend + PPN vs Komisi per Hari</h3><div class="chart-wrap"><canvas id="chart-daily"></canvas></div></div>
-    <div class="chart-card"><h3>Net Profit per Hari</h3><div class="chart-wrap"><canvas id="chart-profit"></canvas></div></div>
+    <div class="chart-card"><h3>Net Profit per Hari (setelah PPN)</h3><div class="chart-wrap"><canvas id="chart-profit"></canvas></div></div>
+  </div>
+  <!-- TABEL RINCIAN PERFORMA HARIAN -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="section-header" style="margin-bottom:14px">
+      <h3 style="font-size:14px;font-weight:600">&#128197; Tabel Rincian Performa Harian</h3>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Tanggal</th>
+          <th>Shopee Clicks</th>
+          <th>Pesanan</th>
+          <th>Komisi Shopee</th>
+          <th>Ad Spend (+PPN)</th>
+          <th>Profit Bersih</th>
+          <th>ROI</th>
+          <th>ROAS</th>
+        </tr></thead>
+        <tbody id="daily-perf-body"></tbody>
+        <tfoot id="daily-perf-foot"></tfoot>
+      </table>
+    </div>
   </div>
 
+  <!-- TABEL STATUS PESANAN -->
   <div class="card" style="margin-bottom:16px">
-    <div class="section-header" style="margin-bottom:14px"><h3 style="font-size:14px;font-weight:600">📅 Tabel Rincian Performa Harian</h3></div>
-    <div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Shopee Clicks</th><th>Pesanan</th><th>Komisi Kotor</th><th>Komisi Bersih</th><th>Ad Spend (+PPN)</th><th>Profit Bersih</th><th>ROI</th><th>ROAS</th></tr></thead><tbody id="daily-perf-body"></tbody><tfoot id="daily-perf-foot"></tfoot></table></div>
-  </div>
-
-  <div class="card" style="margin-bottom:16px">
-    <div class="section-header" style="margin-bottom:14px"><h3 style="font-size:14px;font-weight:600">🛒 Ringkasan Status Pesanan</h3></div>
+    <div class="section-header" style="margin-bottom:14px">
+      <h3 style="font-size:14px;font-weight:600">&#128722; Ringkasan Status Pesanan</h3>
+    </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px" id="order-status-grid"></div>
   </div>
 
   <div class="card">
     <div class="section-header" style="margin-bottom:12px">
-      <h3 style="font-size:13px;font-weight:600">Performa per Tag / Kampanye</h3>
-      <select id="sort-dash" onchange="renderDashTable()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px"><option value="profit">Urutkan: Profit</option><option value="spend">Spend</option><option value="komisi">Komisi</option><option value="roi">ROI</option><option value="roas">ROAS</option></select>
+      <h3 style="font-size:13px;font-weight:600">Performa per Tag / Kampanye <span style="font-size:11px;font-weight:400;color:var(--text2)">(klik tag untuk detail)</span></h3>
+      <select id="sort-dash" onchange="renderDashTable()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px">
+        <option value="profit">Urutkan: Profit</option>
+        <option value="spend">Urutkan: Spend</option>
+        <option value="komisi">Urutkan: Komisi</option>
+        <option value="roi">Urutkan: ROI</option>
+        <option value="roas">Urutkan: ROAS</option>
+        <option value="cvr">Urutkan: CVR</option>
+        <option value="cpr">Urutkan: CPR</option>
+      </select>
     </div>
-    <div class="table-wrap"><table><thead><tr><th>Tag Shopee</th><th>Kampanye Meta</th><th>Spend</th><th>PPN</th><th>Total Biaya</th><th>CPR</th><th>Klik Meta</th><th>Klik Shopee</th><th>CTR%</th><th>Order</th><th>CVR</th><th>Komisi</th><th>ROAS</th><th>Profit</th><th>ROI</th><th>Status</th></tr></thead><tbody id="dash-table-body"></tbody></table></div>
+    <div class="table-wrap">
+      <table><thead><tr>
+        <th>Tag Shopee</th><th>Kampanye Meta</th><th>Spend (Rp)</th><th>PPN</th><th>Total Biaya</th>
+        <th>CPR (Rp)</th><th>Klik Meta</th><th>Klik Shopee</th><th>CTR%</th>
+        <th>Order</th><th>CVR</th><th>Komisi (Rp)</th><th>ROAS</th><th>Profit (Rp)</th><th>ROI</th><th>Status</th>
+      </tr></thead><tbody id="dash-table-body"></tbody></table>
+    </div>
   </div>
 </div>
 
-<!-- sisanya sama seperti file kamu... (detail, tags, alert, hourly, products, modal) -->
-<!-- untuk singkat, saya tidak ulang semua, tapi kode lengkap ada di bawah script -->
+<!-- DETAIL -->
+<div id="page-detail" class="page">
+  <div class="section-header">
+    <div class="section-title">Detail per Kampanye / Per Hari</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <select id="detail-campaign" onchange="renderDetailPage()" style="padding:5px 9px;border:1px solid var(--border);border-radius:8px;font-size:13px;max-width:280px">
+        <option value="">Semua Kampanye</option>
+      </select>
+      <input type="date" id="detail-from" onchange="renderDetailPage()">
+      <span style="color:var(--text2)">–</span>
+      <input type="date" id="detail-to" onchange="renderDetailPage()">
+    </div>
+  </div>
+  <div class="metric-grid" id="detail-metrics"></div>
+  <div class="card">
+    <h3 style="font-size:13px;font-weight:600;margin-bottom:14px">Breakdown Harian <span style="font-size:11px;font-weight:400;color:var(--text2)">(klik tag untuk detail)</span></h3>
+    <div class="table-wrap">
+      <table><thead><tr>
+        <th>Tanggal</th><th>Kampanye</th><th>Tag</th>
+        <th>Spend</th><th>PPN</th><th>Total Biaya</th>
+        <th>Klik Meta</th><th>Klik Shopee</th><th>CTR%</th>
+        <th>Order</th><th>CVR</th><th>Komisi</th><th>ROAS</th><th>Profit</th><th>ROI</th><th>Status</th>
+      </tr></thead><tbody id="detail-table-body"></tbody></table>
+    </div>
+  </div>
+</div>
 
-<div id="page-detail" class="page"><div class="section-header"><div class="section-title">Detail per Kampanye</div></div><div class="metric-grid" id="detail-metrics"></div><div class="card"><div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Kampanye</th><th>Tag</th><th>Spend</th><th>PPN</th><th>Total Biaya</th><th>Klik Meta</th><th>Klik Shopee</th><th>CTR%</th><th>Order</th><th>CVR</th><th>Komisi</th><th>ROAS</th><th>Profit</th><th>ROI</th><th>Status</th></tr></thead><tbody id="detail-table-body"></tbody></table></div>
-<div id="page-tags" class="page"><div class="section-header"><div class="section-title">Analisis Tag</div></div><div class="metric-grid" id="tags-metrics"></div><div class="chart-grid"><div class="chart-card"><h3>Top 10 Tag by Komisi</h3><div class="chart-wrap"><canvas id="chart-tag-komisi"></canvas></div></div><div class="chart-card"><h3>Top 10 Tag by CVR</h3><div class="chart-wrap"><canvas id="chart-tag-cvr"></canvas></div></div></div><div class="card"><div class="table-wrap"><table><thead><tr><th>Tag</th><th>Klik Meta</th><th>Klik Shopee</th><th>CTR%</th><th>Order</th><th>CVR</th><th>Komisi</th><th>Total Biaya</th><th>Profit</th><th>ROI</th><th>Status</th></tr></thead><tbody id="tags-table-body"></tbody></table></div></div></div>
-<div id="page-alert" class="page"><div class="section-header"><div class="section-title">🔴 Alert Iklan Rugi</div></div><div class="alert-controls"><label>Minimal hari:</label><input type="number" id="alert-days" value="3" min="1" max="30" onchange="renderAlertPage()"><input type="date" id="alert-from" onchange="renderAlertPage()"><span>–</span><input type="date" id="alert-to" onchange="renderAlertPage()"></div><div id="alert-body"></div></div>
-<div id="page-hourly" class="page"><div class="section-header"><div class="section-title">⏰ Jam Terbaik</div></div><div class="hour-summary" id="hourly-summary"></div><div class="chart-grid"><div class="chart-card"><h3>Klik per Jam</h3><div class="chart-wrap"><canvas id="chart-hourly-clicks"></canvas></div></div><div class="chart-card"><h3>Order per Jam</h3><div class="chart-wrap"><canvas id="chart-hourly-orders"></canvas></div></div></div><div class="card"><div class="heatmap-wrap"><table class="heatmap" id="heatmap-table"></table></div></div></div>
-<div id="page-products" class="page"><div class="section-header"><div class="section-title">📦 Top Produk</div></div><div class="metric-grid" id="prod-metrics"></div><div class="card"><div class="table-wrap"><table><thead><tr><th>#</th><th>Nama Produk</th><th>Tag</th><th>Order</th><th>Qty</th><th>GMV</th><th>Komisi</th></tr></thead><tbody id="prod-table-body"></tbody></table></div>
+<!-- TAGS -->
+<div id="page-tags" class="page">
+  <div class="section-header">
+    <div class="section-title">Analisis Tag Shopee</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="date" id="tags-from" onchange="renderTagsPage()">
+      <span style="color:var(--text2)">–</span>
+      <input type="date" id="tags-to" onchange="renderTagsPage()">
+    </div>
+  </div>
+  <div class="metric-grid" id="tags-metrics"></div>
+  <div class="chart-grid" style="margin-bottom:18px">
+    <div class="chart-card"><h3>Top 10 Tag by Komisi</h3><div class="chart-wrap"><canvas id="chart-tag-komisi"></canvas></div></div>
+    <div class="chart-card"><h3>Top 10 Tag by CVR</h3><div class="chart-wrap"><canvas id="chart-tag-cvr"></canvas></div></div>
+  </div>
+  <div class="card">
+    <h3 style="font-size:13px;font-weight:600;margin-bottom:14px">Semua Tag <span style="font-size:11px;font-weight:400;color:var(--text2)">(klik tag untuk detail)</span></h3>
+    <div class="table-wrap">
+      <table><thead><tr>
+        <th>Tag</th><th>Klik Meta</th><th>Klik Shopee</th><th>CTR%</th>
+        <th>Order</th><th>CVR</th><th>Komisi (Rp)</th><th>Total Biaya (Rp)</th><th>Profit (Rp)</th><th>ROI</th><th>Status</th>
+      </tr></thead><tbody id="tags-table-body"></tbody></table>
+    </div>
+  </div>
+</div>
 
-<div class="modal-overlay hidden" id="tag-modal"><div class="modal"><div class="modal-header"><div class="modal-header-left"><span class="tag-badge" id="modal-tag-name"></span></div><button class="modal-close" id="modal-close-btn">✕</button></div><div class="modal-body"><div id="modal-metrics" class="modal-metrics"></div><div class="modal-chart-row"><div class="modal-chart-card"><h4>Spend vs Komisi</h4><div class="modal-chart-wrap"><canvas id="modal-chart-spend"></canvas></div></div><div class="modal-chart-card"><h4>Profit</h4><div class="modal-chart-wrap"><canvas id="modal-chart-profit"></canvas></div></div></div><div class="modal-table-wrap"><table><thead><tr><th>Tanggal</th><th>Spend</th><th>PPN</th><th>Total</th><th>Klik</th><th>Order</th><th>Komisi</th><th>Profit</th></tr></thead><tbody id="modal-table-body"></tbody></table></div></div></div></div>
+<!-- ALERT IKLAN RUGI -->
+<div id="page-alert" class="page">
+  <div class="section-header">
+    <div><div class="section-title">🔴 Alert Iklan Rugi Berturut-turut</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Deteksi tag/kampanye yang rugi selama N hari berturut-turut</div></div>
+  </div>
+  <div class="alert-controls">
+    <label>Minimal hari rugi berturut-turut:</label>
+    <input type="number" id="alert-days" value="3" min="1" max="30" onchange="renderAlertPage()">
+    <span style="font-size:12px;color:var(--text2)">hari</span>
+    <div class="date-presets" style="margin-left:8px">
+      <button class="date-preset" onclick="setAlertPreset(3,this)">3 Hari</button>
+      <button class="date-preset active" onclick="setAlertPreset(7,this)">7 Hari</button>
+      <button class="date-preset" onclick="setAlertPreset(14,this)">14 Hari</button>
+      <button class="date-preset" onclick="setAlertPreset(30,this)">30 Hari</button>
+    </div>
+    <span style="font-size:12px;color:var(--text2);margin-left:8px">Periode analisis:</span>
+    <input type="date" id="alert-from" onchange="renderAlertPage()">
+    <span style="color:var(--text2)">–</span>
+    <input type="date" id="alert-to" onchange="renderAlertPage()">
+  </div>
+  <div id="alert-body"><div class="no-alert"><div class="ico">📂</div>Upload data dan mapping terlebih dahulu.</div></div>
+</div>
+
+<!-- JAM TERBAIK -->
+<div id="page-hourly" class="page">
+  <div class="section-header">
+    <div><div class="section-title">⏰ Analisis Jam Terbaik</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Jam berapa klik dan order paling banyak terjadi — bantu atur jadwal iklan Meta</div></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="date" id="hourly-from" onchange="renderHourlyPage()">
+      <span style="color:var(--text2)">–</span>
+      <input type="date" id="hourly-to" onchange="renderHourlyPage()">
+    </div>
+  </div>
+  <div class="hour-summary" id="hourly-summary"></div>
+  <div class="chart-grid" style="margin-bottom:20px">
+    <div class="chart-card"><h3>Distribusi Klik Shopee per Jam</h3><div class="chart-wrap"><canvas id="chart-hourly-clicks"></canvas></div></div>
+    <div class="chart-card"><h3>Distribusi Order per Jam</h3><div class="chart-wrap"><canvas id="chart-hourly-orders"></canvas></div></div>
+  </div>
+  <div class="card">
+    <h3 style="font-size:13px;font-weight:600;margin-bottom:4px">Heatmap Klik per Jam × Hari</h3>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Hijau gelap = klik terbanyak. Merah = tidak ada klik (hari itu). Putih = tidak ada data.</p>
+    <div class="heatmap-wrap"><table class="heatmap" id="heatmap-table"></table></div>
+  </div>
+</div>
+
+<!-- TOP PRODUK -->
+<div id="page-products" class="page">
+  <div class="section-header">
+    <div><div class="section-title">📦 Top Produk per Tag</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Produk terlaris & komisi terbesar dari setiap tag Shopee</div></div>
+  </div>
+  <div class="prod-filter">
+    <select id="prod-tag" onchange="renderProductsPage()"><option value="">Semua Tag</option></select>
+    <select id="prod-sort" onchange="renderProductsPage()">
+      <option value="komisi">Urutkan: Komisi</option>
+      <option value="orders">Urutkan: Order</option>
+      <option value="gmv">Urutkan: Nilai Pembelian</option>
+    </select>
+    <input type="date" id="prod-from" onchange="renderProductsPage()">
+    <span style="color:var(--text2)">–</span>
+    <input type="date" id="prod-to" onchange="renderProductsPage()">
+    <input type="text" id="prod-search" placeholder="🔍 Cari nama produk..." oninput="renderProductsPage()" style="min-width:200px">
+  </div>
+  <div class="metric-grid" id="prod-metrics"></div>
+  <div class="card">
+    <div class="table-wrap">
+      <table><thead><tr>
+        <th>#</th><th>Nama Produk</th><th>Tag</th><th>Toko</th>
+        <th>Order</th><th>Qty Terjual</th><th>Nilai Pembelian</th>
+        <th>Komisi (Rp)</th><th>Komisi/Order</th><th>Kategori</th>
+      </tr></thead><tbody id="prod-table-body"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- TAG DETAIL MODAL -->
+<div class="modal-overlay hidden" id="tag-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <span class="tag-badge" id="modal-tag-name" style="font-size:13px;padding:5px 13px"></span>
+        <div id="modal-campaigns" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+      </div>
+      <button class="modal-close" id="modal-close-btn">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+        <span style="font-size:12px;color:var(--text2);font-weight:500">Periode:</span>
+        <div class="modal-presets" id="modal-presets">
+          <button class="modal-preset" data-days="3">3 Hari</button>
+          <button class="modal-preset active" data-days="7">7 Hari</button>
+          <button class="modal-preset" data-days="30">30 Hari</button>
+          <button class="modal-preset" data-days="0">Semua</button>
+        </div>
+        <div class="modal-date-row">
+          <span style="font-size:12px;color:var(--text3)">atau custom:</span>
+          <input type="date" id="modal-from">
+          <span style="color:var(--text3)">–</span>
+          <input type="date" id="modal-to">
+        </div>
+      </div>
+      <div class="modal-metrics" id="modal-metrics"></div>
+      <div class="modal-chart-row">
+        <div class="modal-chart-card"><h4>Spend + PPN vs Komisi per Hari</h4><div class="modal-chart-wrap"><canvas id="modal-chart-spend"></canvas></div></div>
+        <div class="modal-chart-card"><h4>Profit / Rugi per Hari</h4><div class="modal-chart-wrap"><canvas id="modal-chart-profit"></canvas></div></div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Rincian Harian</div>
+      <div class="modal-table-wrap">
+        <table><thead><tr>
+          <th>Tanggal</th><th>Spend</th><th>PPN</th><th>Total Biaya</th><th>CPR</th>
+          <th>Klik Meta</th><th>Klik Shopee</th><th>CTR%</th>
+          <th>Order</th><th>CVR</th><th>Komisi</th><th>ROAS</th><th>Profit</th><th>ROI</th><th>Status</th>
+        </tr></thead><tbody id="modal-table-body"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-// CHART DEFAULTS
-Chart.defaults.color='#8b9cbf';Chart.defaults.borderColor='rgba(42,53,80,.6)';Chart.defaults.font.family="'Inter',sans-serif";
+// ============================================================
+// CHART.JS GLOBAL DARK THEME
+// ============================================================
+Chart.defaults.color = '#8b9cbf';
+Chart.defaults.borderColor = 'rgba(42,53,80,.6)';
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.plugins.legend.labels.color = '#8b9cbf';
 
+// ============================================================
 // STATE
-let rawMeta=[],rawOrders=[],rawClicks=[],mapping={},ppnRate=11;
-let chartDaily=null,chartProfit=null,chartTagKomisi=null,chartTagCvr=null,wfChart=null;
-let modalTag=null,modalChartSpend=null,modalChartProfit=null;
+// ============================================================
+let rawMeta=[], rawOrders=[], rawClicks=[];
+let mapping={};
+let ppnRate=11;
+let chartDaily=null, chartProfit=null, chartTagKomisi=null, chartTagCvr=null;
+let modalTag=null, modalChartSpend=null, modalChartProfit=null;
 
-// HELPERS - PATCHED dengan ring & spark
-function M(label,value,sub,cls,ringPct,sparkId){
-  const ring = ringPct!==undefined? `<svg class="metric-ring" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,.12)" stroke-width="3"/><circle cx="18" cy="18" r="15.5" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="${97.4}" stroke-dashoffset="${97.4*(1-ringPct/100)}" stroke-linecap="round" transform="rotate(-90 18 18)"/></svg>` : '';
-  const spark = sparkId? `<canvas id="${sparkId}" class="spark-mini"></canvas>` : '';
-  return `<div class="metric ${cls||''}">${ring}<div class="label">${label}</div><div class="value">${value}</div><div class="sub">${sub||'&nbsp;'}</div>${spark}</div>`;
-}
+// ============================================================
+// HELPERS
+// ============================================================
+function M(label,value,sub,cls){return`<div class="metric ${cls||''}"><div class="label">${label}</div><div class="value">${value}</div><div class="sub">${sub||'&nbsp;'}</div></div>`;}
 function fmt(n){return Math.round(n||0).toLocaleString('id-ID');}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function enc(s){return encodeURIComponent(String(s||''));}
 function dec(s){try{return decodeURIComponent(s);}catch(e){return s;}}
-function statusB(p,c){if(!c)return'<span class="badge badge-pending">No Spend</span>';const r=p/c;if(r>0.05)return'<span class="badge badge-profit">Profit</span>';if(r<-0.05)return'<span class="badge badge-loss">Rugi</span>';return'<span class="badge badge-break">Break Even</span>';}
-function cvrB(v){if(v==null)return'-';const c=v>=5?'cvr-high':v>=2?'cvr-mid':'cvr-low';return`<span class="${c}">${v.toFixed(1)}%</span>`;}
-function ctrB(v){if(v==null)return'-';const c=v>=60?'cvr-high':v>=30?'cvr-mid':'cvr-low';return`<span class="${c}">${v.toFixed(1)}%</span>`;}
-function roasB(v){if(v==null)return'-';const c=v>=1.5?'cvr-high':v>=1?'cvr-mid':'cvr-low';return`<span class="${c}">${v.toFixed(2)}x</span>`;}
-function inRange(dt,f,t){const d=String(dt).slice(0,10);if(f&&d<f)return false;if(t&&d>t)return false;return true;}
+function safeId(s){return btoa(encodeURIComponent(s)).replace(/[^a-zA-Z0-9]/g,'');}
+function statusB(profit,cost){if(!cost)return'<span class="badge badge-pending">No Spend</span>';const r=profit/cost;if(r>0.05)return'<span class="badge badge-profit">Profit</span>';if(r<-0.05)return'<span class="badge badge-loss">Rugi</span>';return'<span class="badge badge-break">Break Even</span>';}
+function cvrB(v){if(v===null||v===undefined)return'<span style="color:var(--text3)">-</span>';const c=v>=5?'cvr-high':v>=2?'cvr-mid':'cvr-low';return`<span class="${c}">${v.toFixed(1)}%</span>`;}
+function ctrB(v){if(v===null||v===undefined)return'<span style="color:var(--text3)">-</span>';const c=v>=60?'cvr-high':v>=30?'cvr-mid':'cvr-low';return`<span class="${c}">${v.toFixed(1)}%</span>`;}
+function roasB(v){if(v===null||v===undefined)return'-';const c=v>=1.5?'cvr-high':v>=1?'cvr-mid':'cvr-low';return`<span class="${c}" style="font-weight:600">${v.toFixed(2)}x</span>`;}
+function inRange(dt,from,to){const d=String(dt).slice(0,10);if(from&&d<from)return false;if(to&&d>to)return false;return true;}
+
+// ============================================================
+// PPN
+// ============================================================
 function getPpnAmount(s){return s*(ppnRate/100);}
 function getTotalCost(s){return s*(1+ppnRate/100);}
-
-// PPN
 function setPpn(v){ppnRate=v;document.getElementById('ppn-input').value=v;updatePpnUi();}
 function onPpnChange(){ppnRate=parseFloat(document.getElementById('ppn-input').value)||0;updatePpnUi();}
-function updatePpnUi(){document.getElementById('ppn-indicator').textContent=`PPN ${ppnRate}%`;document.querySelectorAll('.ppn-preset').forEach(b=>b.classList.toggle('active',parseFloat(b.textContent)===ppnRate));rerenderAll();}
-function rerenderAll(){const a=document.querySelector('.page.active');if(!a)return;const id=a.id.replace('page-','');if(id==='dashboard')renderDashboard();}
+function updatePpnUi(){
+  document.getElementById('ppn-indicator').textContent=ppnRate===0?'PPN 0% — Total cost = Spend':`PPN ${ppnRate}% aktif → Total cost = Spend × ${(1+ppnRate/100).toFixed(2)}`;
+  document.querySelectorAll('.ppn-preset').forEach(b=>b.classList.toggle('active',parseFloat(b.textContent)===ppnRate));
+  rerenderAll();
+}
+function rerenderAll(){
+  const a=document.querySelector('.page.active');if(!a)return;
+  const id=a.id.replace('page-','');
+  if(id==='dashboard')renderDashboard();
+  else if(id==='detail')renderDetailPage();
+  else if(id==='tags')renderTagsPage();
+}
 
+// ============================================================
 // NAV
-function showPage(id,btn){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');if(btn)btn.classList.add('active');if(id==='dashboard')renderDashboard();}
+// ============================================================
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(id==='mapping')renderMappingPage();
+  else if(id==='dashboard')renderDashboard();
+  else if(id==='detail')renderDetailPage();
+  else if(id==='tags')renderTagsPage();
+  else if(id==='alert')renderAlertPage();
+  else if(id==='hourly')renderHourlyPage();
+  else if(id==='products')renderProductsPage();
+}
 
-// UPLOAD (sama seperti punyamu)
-function loadMeta(i){const f=i.files[0];if(!f)return;Papa.parse(f,{header:true,skipEmptyLines:true,complete:r=>{rawMeta=r.data.map(row=>{const m={};Object.entries(row).forEach(([k,v])=>{const map={'Campaign name':'campaign_name','Nama kampanye':'campaign_name','Amount spent (IDR)':'spend','Jumlah yang dibelanjakan (IDR)':'spend','Unique link clicks':'link_clicks','Klik tautan unik':'link_clicks','Reporting starts':'date_start','Tanggal mulai pelaporan':'date_start'};m[map[k]||k]=v});return m}).filter(x=>x.campaign_name);setCard('meta',`✓ ${rawMeta.length} baris`,true);checkLoaded();}});}
-function loadOrders(i){const f=i.files[0];if(!f)return;Papa.parse(f,{header:true,skipEmptyLines:true,complete:r=>{rawOrders=r.data;setCard('orders',`✓ ${rawOrders.length} baris`,true);checkLoaded();}});}
-function loadClicks(i){const f=i.files[0];if(!f)return;Papa.parse(f,{header:true,skipEmptyLines:true,complete:r=>{rawClicks=r.data;setCard('clicks',`✓ ${rawClicks.length} baris`,true);checkLoaded();}});}
-function setCard(id,msg,ok){const c=document.getElementById('card-'+id);c.classList.toggle('loaded',ok);c.classList.toggle('error',!ok);document.getElementById('status-'+id).textContent=msg;}
-function checkLoaded(){document.getElementById('upload-ready-box').style.display=(rawMeta.length&&rawOrders.length&&rawClicks.length)?'block':'none';}
+// ============================================================
+// ALERT IKLAN RUGI
+// ============================================================
+let alertCharts={};
+function setAlertPreset(days, el){
+  document.querySelectorAll('#page-alert .date-preset').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const yd=new Date();yd.setDate(yd.getDate()-1);
+  const from=new Date(yd);from.setDate(from.getDate()-(days-1));
+  document.getElementById('alert-from').value=from.toISOString().slice(0,10);
+  document.getElementById('alert-to').value=yd.toISOString().slice(0,10);
+  renderAlertPage();
+}
+function renderAlertPage(){
+  const minDays=parseInt(document.getElementById('alert-days')?.value||3);
+  const from=document.getElementById('alert-from')?.value||null;
+  const to=document.getElementById('alert-to')?.value||null;
+  const body=document.getElementById('alert-body');
+  if(!rawMeta.length&&!rawOrders.length){
+    body.innerHTML='<div class="no-alert"><div class="ico">📂</div>Upload data dan mapping terlebih dahulu.</div>';return;
+  }
+  // Get all dates in range
+  const allDates=[...new Set([
+    ...rawMeta.map(r=>(r['date_start']||'').slice(0,10)),
+    ...rawOrders.map(r=>(r['Waktu Pemesanan']||'').slice(0,10))
+  ].filter(Boolean))].filter(d=>inRange(d,from,to)).sort();
 
-// MAPPING (simplified)
-function getUniqueTags(){const s=new Set();rawOrders.forEach(r=>{const t=(r['Tag_link1']||'').trim()||'Tanpa Tag';s.add(t)});return[...s].sort();}
-function getUniqueCampaigns(){return[...new Set(rawMeta.map(r=>r.campaign_name).filter(Boolean))].sort();}
-function doAutoMapping(){getUniqueTags().forEach(t=>{mapping[t]=getUniqueCampaigns().filter(c=>c.toLowerCase().includes(t.toLowerCase().slice(0,5)))});alert('Auto-map selesai');}
-function clearAllMapping(){mapping={};alert('Cleared');}
-function saveMapping(){alert('Mapping disimpan');}
+  // Build daily profit per tag
+  const tagDayProfit={};  // tag -> {date -> profit}
+  const tags=getUniqueTags();
+  tags.forEach(tag=>{
+    tagDayProfit[tag]={};
+    const camps=mapping[tag]||[];
+    allDates.forEach(dt=>{
+      let spend=0;
+      camps.forEach(c=>{rawMeta.filter(r=>r['campaign_name']===c&&(r['date_start']||'').slice(0,10)===dt).forEach(r=>spend+=parseFloat(r['spend']||0));});
+      const tc=getTotalCost(spend);
+      // unique orders komisi
+      const orderK={};
+      rawOrders.filter(r=>(r['Tag_link1']||'').trim()===tag&&(r['Waktu Pemesanan']||'').slice(0,10)===dt&&r['Status Pesanan']!=='Dibatalkan').forEach(r=>{
+        const oid=r['ID Pemesanan'];
+        if(!orderK[oid])orderK[oid]=0;
+        orderK[oid]+=parseFloat(r['Total Komisi per Produk(Rp)']||0);
+      });
+      const komisi=Object.values(orderK).reduce((s,v)=>s+v,0);
+      tagDayProfit[tag][dt]=komisi-tc;
+    });
+  });
 
-// COMPUTE (simplified dari file kamu)
+  // Detect consecutive loss streaks
+  const alerts=[];
+  tags.forEach(tag=>{
+    const days=allDates;
+    let streak=[];
+    let maxStreak=[];
+    days.forEach(dt=>{
+      const profit=tagDayProfit[tag][dt];
+      // only count days where there was spend (avoid days with 0 activity)
+      const hasActivity=(mapping[tag]||[]).some(c=>rawMeta.some(r=>r['campaign_name']===c&&(r['date_start']||'').slice(0,10)===dt&&parseFloat(r['spend']||0)>0));
+      if(hasActivity&&profit<0){streak.push(dt);}
+      else{if(streak.length>maxStreak.length)maxStreak=[...streak];streak=[];}
+    });
+    if(streak.length>maxStreak.length)maxStreak=[...streak];
+    // Current streak = streak at end
+    const currentStreak=streak;
+    if(currentStreak.length>=minDays){
+      const totalLoss=currentStreak.reduce((s,dt)=>s+tagDayProfit[tag][dt],0);
+      alerts.push({tag,streak:currentStreak,totalLoss,maxStreak,type:'current'});
+    } else if(maxStreak.length>=minDays&&maxStreak.length>currentStreak.length){
+      const totalLoss=maxStreak.reduce((s,dt)=>s+tagDayProfit[tag][dt],0);
+      alerts.push({tag,streak:maxStreak,totalLoss,maxStreak,type:'past'});
+    }
+  });
+
+  alerts.sort((a,b)=>a.totalLoss-b.totalLoss);
+
+  if(!alerts.length){
+    body.innerHTML=`<div class="no-alert"><div class="ico">✅</div><div style="font-size:15px;font-weight:600;color:var(--green);margin-bottom:6px">Tidak ada iklan yang rugi ${minDays}+ hari berturut-turut!</div><div>Semua tag performa baik dalam periode ini.</div></div>`;
+    return;
+  }
+
+  function fmtD(dt){const d=new Date(dt+'T00:00:00');return d.toLocaleDateString('id-ID',{day:'numeric',month:'short'});}
+
+  body.innerHTML=`<div style="font-size:13px;color:var(--text2);margin-bottom:14px">Ditemukan <strong style="color:var(--red)">${alerts.filter(a=>a.type==='current').length} tag aktif rugi</strong> dan <strong style="color:var(--yellow)">${alerts.filter(a=>a.type==='past').length} tag pernah rugi</strong> ≥${minDays} hari berturut-turut.</div>`+
+  alerts.map(a=>{
+    const isCurrent=a.type==='current';
+    const chips=a.streak.map(dt=>`<span class="alert-day-chip">${fmtD(dt)}</span>`).join('');
+    const profitPerDay=a.streak.map(dt=>`${fmtD(dt)}: -Rp${fmt(Math.abs(tagDayProfit[a.tag][dt]))}`).join(' · ');
+    return `<div class="alert-banner ${isCurrent?'loss':'warn'}">
+      <div class="alert-icon">${isCurrent?'🔴':'🟡'}</div>
+      <div style="flex:1">
+        <div class="alert-title">${esc(a.tag)} — ${isCurrent?'SEDANG RUGI':'PERNAH RUGI'} ${a.streak.length} HARI</div>
+        <div class="alert-sub">Total rugi: <strong>-Rp ${fmt(Math.abs(a.totalLoss))}</strong> · ${profitPerDay}</div>
+        <div class="alert-days">${chips}</div>
+        ${(mapping[a.tag]||[]).length?`<div style="font-size:11px;color:var(--text2);margin-top:5px">Kampanye: ${mapping[a.tag].join(', ')}</div>`:''}
+        ${isCurrent?`<div style="margin-top:8px"><span class="badge badge-loss">⚠️ Pertimbangkan pause kampanye ini</span></div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// JAM TERBAIK
+// ============================================================
+let chartHourlyClicks=null,chartHourlyOrders=null;
+function renderHourlyPage(){
+  const from=document.getElementById('hourly-from')?.value||null;
+  const to=document.getElementById('hourly-to')?.value||null;
+  if(!rawClicks.length&&!rawOrders.length){
+    document.getElementById('hourly-summary').innerHTML='<p style="color:var(--text2)">Upload data terlebih dahulu.</p>';return;
+  }
+  // Clicks per hour
+  const clicksByHour=new Array(24).fill(0);
+  rawClicks.forEach(r=>{
+    const dt=(r['Waktu Klik']||'').slice(0,10);
+    if(!inRange(dt,from,to))return;
+    const h=parseInt((r['Waktu Klik']||'').slice(11,13));
+    if(!isNaN(h))clicksByHour[h]++;
+  });
+  // Orders per hour
+  const ordersByHour=new Array(24).fill(0);
+  const orderIds=new Set();
+  rawOrders.forEach(r=>{
+    if(r['Status Pesanan']==='Dibatalkan')return;
+    const dt=(r['Waktu Pemesanan']||'').slice(0,10);
+    if(!inRange(dt,from,to))return;
+    const oid=r['ID Pemesanan'];
+    if(orderIds.has(oid))return;
+    orderIds.add(oid);
+    const h=parseInt((r['Waktu Pemesanan']||'').slice(11,13));
+    if(!isNaN(h))ordersByHour[h]++;
+  });
+
+  const maxClickH=clicksByHour.indexOf(Math.max(...clicksByHour));
+  const maxOrderH=ordersByHour.indexOf(Math.max(...ordersByHour));
+  const totalClicks=clicksByHour.reduce((s,v)=>s+v,0);
+  const totalOrders=ordersByHour.reduce((s,v)=>s+v,0);
+  // Best 3 hours for clicks
+  const top3Click=[...clicksByHour.map((v,h)=>({h,v}))].sort((a,b)=>b.v-a.v).slice(0,3);
+  const top3Order=[...ordersByHour.map((v,h)=>({h,v}))].sort((a,b)=>b.v-a.v).slice(0,3);
+
+  document.getElementById('hourly-summary').innerHTML=
+    `<div class="hour-card"><div class="hc-label">Jam Klik Terbanyak</div><div class="hc-val" style="color:var(--green)">${String(maxClickH).padStart(2,'0')}:00</div><div class="hc-sub">${fmt(clicksByHour[maxClickH])} klik</div></div>`+
+    `<div class="hour-card"><div class="hc-label">Jam Order Terbanyak</div><div class="hc-val" style="color:var(--accent)">${String(maxOrderH).padStart(2,'0')}:00</div><div class="hc-sub">${fmt(ordersByHour[maxOrderH])} order</div></div>`+
+    `<div class="hour-card"><div class="hc-label">Top 3 Jam Klik</div><div class="hc-val" style="font-size:14px;color:var(--green)">${top3Click.map(x=>String(x.h).padStart(2,'0')+':00').join(', ')}</div><div class="hc-sub">Jadwalkan iklan di jam ini</div></div>`+
+    `<div class="hour-card"><div class="hc-label">Top 3 Jam Order</div><div class="hc-val" style="font-size:14px;color:var(--accent)">${top3Order.map(x=>String(x.h).padStart(2,'0')+':00').join(', ')}</div><div class="hc-sub">Konversi tertinggi</div></div>`+
+    `<div class="hour-card"><div class="hc-label">Total Klik</div><div class="hc-val">${fmt(totalClicks)}</div><div class="hc-sub">dalam periode</div></div>`+
+    `<div class="hour-card"><div class="hc-label">Total Order</div><div class="hc-val">${fmt(totalOrders)}</div><div class="hc-sub">unique orders</div></div>`;
+
+  const labels=Array.from({length:24},(_,h)=>String(h).padStart(2,'0')+':00');
+  const clickColors=clicksByHour.map(v=>{const mx=Math.max(...clicksByHour);return v===0?'#e5e7eb':v>=mx*.8?'#15803d':v>=mx*.5?'#22c55e':v>=mx*.25?'#86efac':'#bbf7d0';});
+  const orderColors=ordersByHour.map(v=>{const mx=Math.max(...ordersByHour);return v===0?'#e5e7eb':v>=mx*.8?'#4f46e5':v>=mx*.5?'#6366f1':v>=mx*.25?'#a5b4fc':'#c7d2fe';});
+
+  if(chartHourlyClicks)chartHourlyClicks.destroy();
+  chartHourlyClicks=new Chart(document.getElementById('chart-hourly-clicks').getContext('2d'),{type:'bar',data:{labels,datasets:[{label:'Klik',data:clicksByHour,backgroundColor:clickColors,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}}},x:{ticks:{font:{size:9},maxRotation:45}}}}});
+  if(chartHourlyOrders)chartHourlyOrders.destroy();
+  chartHourlyOrders=new Chart(document.getElementById('chart-hourly-orders').getContext('2d'),{type:'bar',data:{labels,datasets:[{label:'Order',data:ordersByHour,backgroundColor:orderColors,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}}},x:{ticks:{font:{size:9},maxRotation:45}}}}});
+
+  // Heatmap: rows=days of week, cols=hours
+  const dayNames=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+  const heatData=Array.from({length:7},()=>new Array(24).fill(0));
+  rawClicks.forEach(r=>{
+    const dt=(r['Waktu Klik']||'').slice(0,10);if(!inRange(dt,from,to))return;
+    const d=new Date(dt+'T00:00:00');
+    const h=parseInt((r['Waktu Klik']||'').slice(11,13));
+    if(!isNaN(h))heatData[d.getDay()][h]++;
+  });
+  const allVals=heatData.flat().filter(v=>v>0);
+  const maxVal=allVals.length?Math.max(...allVals):1;
+  const p20=maxVal*.2,p50=maxVal*.5,p75=maxVal*.75;
+  function hmCls(v){if(v===0)return'hm-0';if(v<p20)return'hm-1';if(v<p50)return'hm-2';if(v<p75)return'hm-3';return'hm-4';}
+  const hdrCols=Array.from({length:24},(_,h)=>`<th>${String(h).padStart(2,'0')}</th>`).join('');
+  const bodyRows=dayNames.map((day,di)=>{
+    const cells=heatData[di].map(v=>`<td class="${hmCls(v)}" title="${v} klik">${v||''}</td>`).join('');
+    return`<tr><th style="text-align:right;padding-right:8px;color:var(--text2)">${day}</th>${cells}</tr>`;
+  }).join('');
+  document.getElementById('heatmap-table').innerHTML=`<thead><tr><th></th>${hdrCols}</tr></thead><tbody>${bodyRows}</tbody>`;
+}
+
+// ============================================================
+// TOP PRODUK PER TAG
+// ============================================================
+function renderProductsPage(){
+  const selTag=document.getElementById('prod-tag')?.value||'';
+  const sortBy=document.getElementById('prod-sort')?.value||'komisi';
+  const from=document.getElementById('prod-from')?.value||null;
+  const to=document.getElementById('prod-to')?.value||null;
+  const search=(document.getElementById('prod-search')?.value||'').toLowerCase();
+
+  // Populate tag filter on first run
+  const tagSel=document.getElementById('prod-tag');
+  if(tagSel&&tagSel.options.length<=1){
+    getUniqueTags().forEach(t=>{const o=new Option(t,t);tagSel.appendChild(o);});
+  }
+  if(!rawOrders.length){
+    document.getElementById('prod-table-body').innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:20px">Upload data Shopee Komisi terlebih dahulu.</td></tr>';return;
+  }
+
+  // Aggregate per product (Nama Barang + ID Barang) per tag
+  const prodMap={};  // key = tag+'||'+idBarang
+  rawOrders.forEach(r=>{
+    if(r['Status Pesanan']==='Dibatalkan')return;
+    const dt=(r['Waktu Pemesanan']||'').slice(0,10);
+    if(!inRange(dt,from,to))return;
+    const tag=(r['Tag_link1']||'').trim();if(!tag||tag==='Ada')return;
+    if(selTag&&tag!==selTag)return;
+    const nama=(r['Nama Barange']||r['Nama Barang']||'').trim();
+    if(!nama)return;
+    if(search&&!nama.toLowerCase().includes(search)&&!tag.toLowerCase().includes(search))return;
+    const idB=r['ID Barang']||nama;
+    const key=tag+'||'+idB;
+    if(!prodMap[key]){prodMap[key]={tag,nama,idBarang:idB,toko:r['Nama Toko']||'-',kategori:r['L2 Kategori Global']||r['L1 Kategori Global']||'-',orders:new Set(),qty:0,gmv:0,komisi:0};}
+    prodMap[key].orders.add(r['ID Pemesanan']);
+    prodMap[key].qty+=parseInt(r['Jumlah']||0);
+    prodMap[key].gmv+=parseFloat(r['Nilai Pembelian(Rp)']||0);
+    prodMap[key].komisi+=parseFloat(r['Total Komisi per Produk(Rp)']||0);
+  });
+
+  let rows=Object.values(prodMap).map(p=>({...p,orderCount:p.orders.size}));
+  if(sortBy==='orders')rows.sort((a,b)=>b.orderCount-a.orderCount);
+  else if(sortBy==='gmv')rows.sort((a,b)=>b.gmv-a.gmv);
+  else rows.sort((a,b)=>b.komisi-a.komisi);
+
+  const totKomisi=rows.reduce((s,r)=>s+r.komisi,0);
+  const totOrders=rows.reduce((s,r)=>s+r.orderCount,0);
+  const totGmv=rows.reduce((s,r)=>s+r.gmv,0);
+  const totQty=rows.reduce((s,r)=>s+r.qty,0);
+  document.getElementById('prod-metrics').innerHTML=
+    M('Total Produk Unik',rows.length,'','blue')+
+    M('Total Order',fmt(totOrders),'unique orders','')+
+    M('Total Qty Terjual',fmt(totQty),'item','purple')+
+    M('Total GMV','Rp '+fmt(totGmv),'nilai pembelian','')+
+    M('Total Komisi','Rp '+fmt(totKomisi),'','green');
+
+  function rankCls(i){if(i===0)return'gold';if(i===1)return'silver';if(i===2)return'bronze';return'';}
+  document.getElementById('prod-table-body').innerHTML=rows.slice(0,100).map((r,i)=>`<tr>
+    <td><span class="prod-rank ${rankCls(i)}">${i+1}</span></td>
+    <td style="max-width:220px;font-weight:500">${esc(r.nama)}</td>
+    <td><span class="tag-badge" style="font-size:10px">${esc(r.tag)}</span></td>
+    <td style="font-size:11px;color:var(--text2)">${esc(r.toko)}</td>
+    <td style="font-weight:600">${fmt(r.orderCount)}</td>
+    <td>${fmt(r.qty)}</td>
+    <td>Rp ${fmt(r.gmv)}</td>
+    <td style="color:var(--green);font-weight:600">Rp ${fmt(r.komisi)}</td>
+    <td style="color:var(--text2)">${r.orderCount>0?'Rp '+fmt(r.komisi/r.orderCount):'-'}</td>
+    <td style="font-size:11px;color:var(--text2)">${esc(r.kategori)}</td>
+  </tr>`).join('')||'<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:20px">Tidak ada data</td></tr>';
+}
+
+// ============================================================
+// META COLUMN NORMALIZER
+// ============================================================
+const META_COL_MAP={
+  'Reporting starts':'date_start','Reporting ends':'date_end','Campaign name':'campaign_name',
+  'Amount spent (IDR)':'spend','Unique link clicks':'link_clicks','Impressions':'impressions',
+  'Reach':'reach','Results':'results','Cost per results':'cost_per_result',
+  'Ad set budget':'adset_budget','Campaign delivery':'delivery',
+  // Indonesia - varian 1
+  'Tanggal mulai pelaporan':'date_start','Tanggal selesai pelaporan':'date_end',
+  'Nama kampanye':'campaign_name','Jumlah yang dibelanjakan (IDR)':'spend',
+  'Klik tautan unik':'link_clicks','Tayangan':'impressions','Jangkauan':'reach',
+  'Hasil':'results','Biaya per hasil':'cost_per_result',
+  'Anggaran set iklan':'adset_budget','Penayangan kampanye':'delivery',
+  // Indonesia - varian 2 (dari file akbar.csv)
+  'Awal pelaporan':'date_start','Akhir pelaporan':'date_end',
+  'Klik Tautan Unik':'link_clicks','Impresi':'impressions',
+  'Biaya per Hasil':'cost_per_result','Anggaran Set Iklan':'adset_budget',
+  'Jenis Anggaran Set Iklan':'budget_type','Berakhir':'ends','Frekuensi':'frequency',
+  'Pengaturan atribusi':'attribution_setting','Indikator Hasil':'result_indicator'
+};
+function normalizeMetaRow(row){
+  const out={};
+  Object.entries(row).forEach(([k,v])=>{const key=META_COL_MAP[k.trim()];out[key||k]=v;});
+  return out;
+}
+function detectMetaLang(headers){
+  const id=['Nama kampanye','Jumlah yang dibelanjakan (IDR)','Klik tautan unik'];
+  return id.filter(h=>headers.includes(h)).length>=2?'🇮🇩 Bahasa Indonesia':'🇬🇧 English';
+}
+
+// ============================================================
+// UPLOAD
+// ============================================================
+function loadMeta(input){
+  const f=input.files[0];if(!f)return;
+  Papa.parse(f,{header:true,skipEmptyLines:true,complete:r=>{
+    const lang=detectMetaLang(r.meta.fields||[]);
+    rawMeta=r.data.map(normalizeMetaRow).filter(row=>row['campaign_name']?.trim());
+    setCard('meta',`✓ ${rawMeta.length} baris (${lang})`,true);checkLoaded();
+  },error:()=>setCard('meta','✗ Gagal membaca file',false)});
+}
+function loadOrders(input){
+  const f=input.files[0];if(!f)return;
+  Papa.parse(f,{header:true,skipEmptyLines:true,complete:r=>{
+    rawOrders=r.data;setCard('orders',`✓ ${rawOrders.length} baris`,true);checkLoaded();
+  },error:()=>setCard('orders','✗ Gagal membaca file',false)});
+}
+function loadClicks(input){
+  const f=input.files[0];if(!f)return;
+  Papa.parse(f,{header:true,skipEmptyLines:true,complete:r=>{
+    rawClicks=r.data;setCard('clicks',`✓ ${rawClicks.length} baris`,true);checkLoaded();
+  },error:()=>setCard('clicks','✗ Gagal membaca file',false)});
+}
+function setCard(id,msg,ok){
+  const c=document.getElementById('card-'+id);
+  c.classList.remove('loaded','error');c.classList.add(ok?'loaded':'error');
+  document.getElementById('status-'+id).textContent=msg;
+}
+function checkLoaded(){
+  const ready=rawMeta.length&&rawOrders.length&&rawClicks.length;
+  document.getElementById('upload-ready-box').style.display=ready?'block':'none';
+}
+
+// ============================================================
+// MAPPING DATA
+// ============================================================
+function getUniqueTags(){
+  const s=new Set();
+  rawOrders.forEach(r=>{
+    const t=(r['Tag_link1']||'').trim();
+    if(t) s.add(t); else s.add('Tanpa Tag');
+  });
+  return [...s].sort();
+}
+function getUniqueCampaigns(){return[...new Set(rawMeta.map(r=>r['campaign_name']).filter(Boolean))].sort();}
+function extractBaseTag(raw){if(!raw)return'';return raw.replace(/[-–]+$/,'').replace(/-[Ff]acebook.*$/i,'').replace(/[-–]+$/,'').trim();}
+function doAutoMapping(){
+  const tags=getUniqueTags(),camps=getUniqueCampaigns();
+  tags.forEach(tag=>{
+    const tc=tag.toLowerCase().replace(/[^a-z0-9]/g,'');
+    mapping[tag]=camps.filter(c=>{const cc=c.toLowerCase().replace(/[^a-z0-9]/g,'');return cc.includes(tc)||tc.includes(cc.slice(0,6));});
+  });
+  renderMappingList();renderMappingSummary();
+  alert(`Auto-map selesai! ${Object.values(mapping).filter(v=>v.length).length}/${tags.length} tag di-mapping. Periksa dan sesuaikan.`);
+}
+function clearAllMapping(){if(!confirm('Hapus semua mapping?'))return;getUniqueTags().forEach(t=>mapping[t]=[]);renderMappingList();renderMappingSummary();}
+function saveMapping(){renderMappingSummary();alert('Mapping disimpan! Buka tab Dashboard.');}
+
+// ============================================================
+// MAPPING UI — Searchable multi-select
+// ============================================================
+let openMsId=null;
+
+function renderMappingPage(){
+  if(!rawMeta.length||!rawOrders.length){
+    document.getElementById('mapping-info').style.display='block';
+    document.getElementById('mapping-warn').style.display='none';
+    document.getElementById('mapping-body').style.display='none';return;
+  }
+  document.getElementById('mapping-info').style.display='none';
+  document.getElementById('mapping-warn').style.display='block';
+  document.getElementById('mapping-body').style.display='grid';
+  getUniqueTags().forEach(t=>{if(!mapping[t])mapping[t]=[];});
+  renderMappingList();renderMappingSummary();
+}
+function renderMappingList(){
+  const tags=getUniqueTags();
+  const q=(document.getElementById('search-tags')?.value||'').toLowerCase();
+  const camps=getUniqueCampaigns();
+  document.getElementById('mapping-list').innerHTML=tags.filter(t=>t.toLowerCase().includes(q)).map(tag=>{
+    const sid=safeId(tag);
+    const sel=mapping[tag]||[];
+    const chips=sel.length?sel.map(s=>`<span class="ms-chip">${esc(s)}<span class="ms-chip-x" data-tag="${enc(tag)}" data-val="${enc(s)}">✕</span></span>`).join(''):'<span class="ms-placeholder">Pilih kampanye...</span>';
+    const opts=camps.map(c=>`<div class="ms-option${sel.includes(c)?' selected':''}" data-tag="${enc(tag)}" data-val="${enc(c)}"><input type="checkbox"${sel.includes(c)?' checked':''}><span class="ms-option-label">${esc(c)}</span></div>`).join('');
+    return`<div class="mapping-item">
+      <span class="tag-badge" style="margin-top:6px;flex-shrink:0">${esc(tag)}</span>
+      <span class="arrow">→</span>
+      <div class="ms-wrap">
+        <div class="ms-trigger" id="mst-${sid}" data-sid="${sid}" data-tag="${enc(tag)}">
+          ${chips}<span class="ms-caret">▼</span>
+        </div>
+        <div class="ms-panel" id="msp-${sid}">
+          <div class="ms-search-wrap"><input class="ms-search" placeholder="🔍 Ketik nama kampanye..." data-sid="${sid}" data-tag="${enc(tag)}"></div>
+          <div class="ms-options" id="msopt-${sid}">${opts}</div>
+          <div class="ms-footer">
+            <button class="btn btn-ghost btn-sm" data-action="clear" data-tag="${enc(tag)}">Hapus semua</button>
+            <button class="btn btn-primary btn-sm" data-action="done" data-sid="${sid}">Selesai</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Single delegated listener on the mapping-list
+document.getElementById('mapping-list').addEventListener('click',function(e){
+  // chip remove
+  if(e.target.classList.contains('ms-chip-x')){
+    const tag=dec(e.target.dataset.tag),val=dec(e.target.dataset.val);
+    mapping[tag]=mapping[tag].filter(v=>v!==val);
+    renderMappingList();renderMappingSummary();return;
+  }
+  // option row
+  const optEl=e.target.closest('.ms-option');
+  if(optEl){
+    const tag=dec(optEl.dataset.tag),val=dec(optEl.dataset.val);
+    if(!mapping[tag])mapping[tag]=[];
+    if(mapping[tag].includes(val))mapping[tag]=mapping[tag].filter(v=>v!==val);
+    else mapping[tag].push(val);
+    renderMappingList();renderMappingSummary();return;
+  }
+  // trigger open/close
+  const trigger=e.target.closest('.ms-trigger');
+  if(trigger){
+    const sid=trigger.dataset.sid;
+    const panel=document.getElementById('msp-'+sid);
+    if(!panel)return;
+    const isOpen=panel.classList.contains('open');
+    // close all
+    document.querySelectorAll('.ms-panel.open').forEach(p=>p.classList.remove('open'));
+    document.querySelectorAll('.ms-trigger.open').forEach(t=>t.classList.remove('open'));
+    if(!isOpen){panel.classList.add('open');trigger.classList.add('open');panel.querySelector('.ms-search')?.focus();}
+    return;
+  }
+  // done button
+  if(e.target.dataset.action==='done'){
+    const sid=e.target.dataset.sid;
+    document.getElementById('msp-'+sid)?.classList.remove('open');
+    document.getElementById('mst-'+sid)?.classList.remove('open');
+    renderMappingSummary();return;
+  }
+  // clear button
+  if(e.target.dataset.action==='clear'){
+    const tag=dec(e.target.dataset.tag);
+    mapping[tag]=[];renderMappingList();renderMappingSummary();return;
+  }
+});
+document.getElementById('mapping-list').addEventListener('input',function(e){
+  if(!e.target.classList.contains('ms-search'))return;
+  const sid=e.target.dataset.sid,tag=dec(e.target.dataset.tag),q=e.target.value.toLowerCase();
+  const camps=getUniqueCampaigns().filter(c=>c.toLowerCase().includes(q));
+  const sel=mapping[tag]||[];
+  document.getElementById('msopt-'+sid).innerHTML=camps.length
+    ?camps.map(c=>`<div class="ms-option${sel.includes(c)?' selected':''}" data-tag="${enc(tag)}" data-val="${enc(c)}"><input type="checkbox"${sel.includes(c)?' checked':''}><span class="ms-option-label">${esc(c)}</span></div>`).join('')
+    :'<div class="ms-empty">Tidak ada hasil</div>';
+});
+
+// close panels when clicking outside
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.ms-wrap')&&!e.target.closest('.ms-panel')){
+    document.querySelectorAll('.ms-panel.open').forEach(p=>p.classList.remove('open'));
+    document.querySelectorAll('.ms-trigger.open').forEach(t=>t.classList.remove('open'));
+  }
+});
+
+function renderMappingSummary(){
+  const tags=getUniqueTags();
+  const mapped=tags.filter(t=>mapping[t]?.length);
+  const unmapped=tags.filter(t=>!mapping[t]?.length);
+  let html=`<div style="font-size:12px;color:var(--text2);margin-bottom:10px">${mapped.length}/${tags.length} tag sudah di-mapping</div>`;
+  html+=mapped.map(t=>`<div style="margin-bottom:7px;padding:8px 10px;background:#f9fafb;border-radius:8px;font-size:12px"><span class="tag-badge" style="margin-right:6px">${esc(t)}</span><span style="color:var(--text2)">→ ${esc(mapping[t].join(' / '))}</span></div>`).join('');
+  if(unmapped.length)html+=`<div style="font-size:12px;color:var(--text3);margin-top:10px;line-height:1.9">⚠️ Belum mapping:<br>${unmapped.map(t=>`<span class="tag-badge" style="margin:2px">${esc(t)}</span>`).join('')}</div>`;
+  document.getElementById('mapping-summary').innerHTML=html;
+}
+
+// ============================================================
+// DATE HELPERS
+// ============================================================
+function getDateRange(){return{from:document.getElementById('date-from')?.value||null,to:document.getElementById('date-to')?.value||null};}
+function setPreset(p,el){
+  document.querySelectorAll('.date-preset').forEach(b=>b.classList.remove('active'));el.classList.add('active');
+  const yd=new Date();yd.setDate(yd.getDate()-1);const ydStr=yd.toISOString().slice(0,10);
+  if(p==='yesterday'){document.getElementById('date-from').value=ydStr;document.getElementById('date-to').value=ydStr;}
+  else if(p==='7d'){const d=new Date();d.setDate(d.getDate()-7);document.getElementById('date-from').value=d.toISOString().slice(0,10);document.getElementById('date-to').value=ydStr;}
+  else{document.getElementById('date-from').value='';document.getElementById('date-to').value='';}
+  renderDashboard();
+}
+
+// ============================================================
+// AGGREGATION
+// ============================================================
+function computeCampaignMeta(from,to){
+  const spend={},clicks={},results={};
+  rawMeta.forEach(r=>{
+    const dt=(r['date_start']||'').slice(0,10);if(!inRange(dt,from,to))return;
+    const c=r['campaign_name'];
+    spend[c]=(spend[c]||0)+parseFloat(r['spend']||0);
+    clicks[c]=(clicks[c]||0)+parseFloat(r['link_clicks']||0);
+    results[c]=(results[c]||0)+parseFloat(r['results']||0);
+  });
+  return{spend,clicks,results};
+}
+function newStat(tag){return{tag,shopeeClicks:0,orders:0,komisi:0,komisiKotor:0,spend:0,metaClicks:0,metaResults:0,ppnAmount:0,totalCost:0,profit:0,roi:null,roas:null,cpr:null,cvr:null,clickThru:null,campaigns:[],_orderIds:new Set()};}
 function computeTagStats(from,to){
-  const ts={};rawOrders.forEach(r=>{if(r['Status Pesanan']==='Dibatalkan')return;const dt=(r['Waktu Pemesanan']||'').slice(0,10);if(!inRange(dt,from,to))return;const tag=(r['Tag_link1']||'').trim()||'Tanpa Tag';if(!ts[tag])ts[tag]={tag,komisi:0,orders:0,spend:0,shopeeClicks:0,metaClicks:0};ts[tag].komisi+=parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);ts[tag].orders++;});
-  rawClicks.forEach(r=>{const dt=(r['Waktu Klik']||'').slice(0,10);if(!inRange(dt,from,to))return;const tag=(r['Tag_link']||'').trim()||'Tanpa Tag';if(!ts[tag])ts[tag]={tag,komisi:0,orders:0,spend:0,shopeeClicks:0,metaClicks:0};ts[tag].shopeeClicks++;});
-  Object.values(ts).forEach(s=>{const camps=mapping[s.tag]||[];camps.forEach(c=>rawMeta.filter(r=>r.campaign_name===c&&inRange((r.date_start||'').slice(0,10),from,to)).forEach(r=>{s.spend+=parseFloat(r.spend||0);s.metaClicks+=parseFloat(r.link_clicks||0);}));s.totalCost=getTotalCost(s.spend);s.profit=s.komisi-s.totalCost;s.roas=s.totalCost>0?s.komisi/s.totalCost:null;s.cvr=s.shopeeClicks>0?s.orders/s.shopeeClicks*100:null;});
+  const ts={};
+  rawClicks.forEach(r=>{
+    const tag=extractBaseTag(r['Tag_link']||'');if(!tag)return;
+    const dt=(r['Waktu Klik']||'').slice(0,10);if(!inRange(dt,from,to))return;
+    if(!ts[tag])ts[tag]=newStat(tag);ts[tag].shopeeClicks++;
+  });
+  // Deduplicate by ID Pemesanan per tag — group all rows of same order together
+  // komisi bersih: sum per unique order (per tag)
+  // komisi kotor : 'Total Komisi per Produk(Rp)'
+  const orderKomisi={};    // orderId -> {bersih, kotor, tag, dt, status}
+  rawOrders.forEach(r=>{
+    if(r['Status Pesanan']==='Dibatalkan')return;
+    let tag=(r['Tag_link1']||'').trim();if(!tag) tag='Tanpa Tag';if(tag==='Ada') tag='Tanpa Tag';
+    const dt=(r['Waktu Pemesanan']||'').slice(0,10);if(!inRange(dt,from,to))return;
+    const oid=r['ID Pemesanan']||'';
+    const key=tag+'||'+oid;
+    if(!orderKomisi[key]){orderKomisi[key]={tag,dt,oid,bersih:0,kotor:0};}
+    orderKomisi[key].bersih+=parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);
+    orderKomisi[key].kotor+=parseFloat(r['Total Komisi per Produk(Rp)']||0);
+  });
+  // Aggregate into tag stats
+  Object.values(orderKomisi).forEach(o=>{
+    const tag=o.tag;
+    if(!ts[tag])ts[tag]=newStat(tag);
+    if(!ts[tag]._orderIds.has(o.oid)){
+      ts[tag]._orderIds.add(o.oid);
+      ts[tag].orders++;
+      ts[tag].komisi+=o.bersih;
+      ts[tag].komisiKotor+=o.kotor;
+    }
+  });
+  const{spend:cS,clicks:cC,results:cR}=computeCampaignMeta(from,to);
+  Object.values(ts).forEach(s=>{
+    const camps=mapping[s.tag]||[];
+    camps.forEach(c=>{s.spend+=(cS[c]||0);s.metaClicks+=(cC[c]||0);s.metaResults+=(cR[c]||0);});
+    s.ppnAmount=getPpnAmount(s.spend);s.totalCost=getTotalCost(s.spend);
+    s.profit=s.komisi-s.totalCost;
+    s.roi=s.totalCost>0?s.profit/s.totalCost*100:null;
+    s.roas=s.totalCost>0?s.komisi/s.totalCost:null;
+    s.cpr=s.metaResults>0?s.spend/s.metaResults:null;
+    s.cvr=s.shopeeClicks>0?s.orders/s.shopeeClicks*100:null;
+    s.clickThru=s.metaClicks>0?s.shopeeClicks/s.metaClicks*100:null;
+    s.campaigns=camps;
+  });
   return ts;
 }
+function computeRawSpend(from,to){let t=0;rawMeta.forEach(r=>{if(inRange((r['date_start']||'').slice(0,10),from,to))t+=parseFloat(r['spend']||0);});return t;}
+function computeRawClicks(from,to){let t=0;rawMeta.forEach(r=>{if(inRange((r['date_start']||'').slice(0,10),from,to))t+=parseFloat(r['link_clicks']||0);});return t;}
 function computeDailyStats(from,to){
-  const days={};rawMeta.forEach(r=>{const dt=(r.date_start||'').slice(0,10);if(!inRange(dt,from,to))return;if(!days[dt])days[dt]={spend:0,komisi:0};days[dt].spend+=parseFloat(r.spend||0);});
-  rawOrders.forEach(r=>{if(r['Status Pesanan']==='Dibatalkan')return;const dt=(r['Waktu Pemesanan']||'').slice(0,10);if(!inRange(dt,from,to))return;if(!days[dt])days[dt]={spend:0,komisi:0};days[dt].komisi+=parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);});
-  return Object.entries(days).sort().map(([dt,d])=>({dt,spend:d.spend,komisi:d.komisi,totalCost:getTotalCost(d.spend),profit:d.komisi-getTotalCost(d.spend)}));
+  const days={};
+  rawMeta.forEach(r=>{
+    const dt=(r['date_start']||'').slice(0,10);if(!inRange(dt,from,to))return;
+    if(!days[dt])days[dt]={spend:0,komisi:0,komisiKotor:0,_orderIds:new Set()};
+    days[dt].spend+=parseFloat(r['spend']||0);
+  });
+  // Deduplicate orders per day
+  const orderDaily={};  // key= dt+'||'+oid -> {bersih,kotor}
+  rawOrders.forEach(r=>{
+    if(r['Status Pesanan']==='Dibatalkan')return;
+    const dt=(r['Waktu Pemesanan']||'').slice(0,10);if(!inRange(dt,from,to))return;
+    const oid=r['ID Pemesanan']||('_'+Math.random());
+    const key=dt+'||'+oid;
+    if(!orderDaily[key])orderDaily[key]={dt,bersih:0,kotor:0};
+    orderDaily[key].bersih+=parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);
+    orderDaily[key].kotor+=parseFloat(r['Total Komisi per Produk(Rp)']||0);
+  });
+  Object.values(orderDaily).forEach(o=>{
+    if(!days[o.dt])days[o.dt]={spend:0,komisi:0,komisiKotor:0,_orderIds:new Set()};
+    days[o.dt].komisi+=o.bersih;
+    days[o.dt].komisiKotor+=o.kotor;
+  });
+  return Object.entries(days).sort(([a],[b])=>a.localeCompare(b)).map(([dt,d])=>({
+    dt,spend:d.spend,komisi:d.komisi,komisiKotor:d.komisiKotor,
+    totalCost:getTotalCost(d.spend),profit:d.komisi-getTotalCost(d.spend)
+  }));
 }
 
-// DASHBOARD - PATCHED
+// ============================================================
+// DASHBOARD
+// ============================================================
 function renderDashboard(){
-  if(!rawMeta.length)return;
-  const from=document.getElementById('date-from').value||null;const to=document.getElementById('date-to').value||null;
-  const ts=computeTagStats(from,to);const daily=computeDailyStats(from,to);const all=Object.values(ts);
-  const totSpend=all.reduce((s,t)=>s+t.spend,0);const totCost=getTotalCost(totSpend);const totPPN=getPpnAmount(totSpend);
-  const totKomisi=all.reduce((s,t)=>s+t.komisi,0);const totProfit=totKomisi-totCost;const totOrders=all.reduce((s,t)=>s+t.orders,0);
-  const totShopee=all.reduce((s,t)=>s+t.shopeeClicks,0);const totMeta=all.reduce((s,t)=>s+t.metaClicks,0);
-  const roi=totCost>0?(totProfit/totCost*100).toFixed(1):'-';const ctr=totMeta>0?(totShopee/totMeta*100).toFixed(1):'-';const cvr=totShopee>0?(totOrders/totShopee*100).toFixed(1):'-';
-
-  // Ring percentages
-  const spendRing=100;const costRing=85;const komisiRing=totCost>0?Math.min(100,totKomisi/totCost*60):0;const profitRing=totCost>0?Math.min(100,Math.max(0,50+totProfit/totCost*50)):50;
-
+  if(!rawMeta.length&&!rawOrders.length)return;
+  const{from,to}=getDateRange();
+  const ts=computeTagStats(from,to);
+  const daily=computeDailyStats(from,to);
+  const all=Object.values(ts);
+  const totSpend=computeRawSpend(from,to);
+  const totMetaClicks=computeRawClicks(from,to);
+  const totPPN=getPpnAmount(totSpend);
+  const totCost=getTotalCost(totSpend);
+  const mappedSpend=all.reduce((s,t)=>s+t.spend,0);
+  const unmapped=totSpend-mappedSpend;
+  const totKomisi=all.reduce((s,t)=>s+t.komisi,0);
+  const totKomisiKotor=all.reduce((s,t)=>s+t.komisiKotor,0);
+  const totProfit=totKomisiKotor-totCost;
+  const totOrders=all.reduce((s,t)=>s+t.orders,0);
+  const totShopee=all.reduce((s,t)=>s+t.shopeeClicks,0);
+  const roi=totCost>0?(totProfit/totCost*100).toFixed(1):'-';
+  const ctr=totMetaClicks>0?(totShopee/totMetaClicks*100).toFixed(1):'-';
+  const cvr=totShopee>0?(totOrders/totShopee*100).toFixed(1):'-';
+  const spendSub=unmapped>1000?`sebelum PPN · ⚠️ Rp ${fmt(unmapped)} belum mapping`:'sebelum PPN';
   document.getElementById('dash-metrics').innerHTML=
-    M('Total Spend','Rp '+fmt(totSpend),'sebelum PPN','blue',spendRing,'spark-spend')+
-    M(`PPN ${ppnRate}%`,'Rp '+fmt(totPPN),'biaya pajak','yellow',costRing,'spark-cost')+
-    M('Total Biaya','Rp '+fmt(totCost),'spend+PPN','red',85)+
-    M('Klik Shopee',fmt(totShopee),'CTR '+ctr+'%','',null,'spark-shopee')+
-    M('CVR',cvr+'%',fmt(totOrders)+' order','purple')+
-    M('Komisi','Rp '+fmt(totKomisi),'kotor','green',komisiRing,'spark-komisi')+
-    M('Net Profit','Rp '+fmt(totProfit),'ROI '+roi+'%',totProfit>=0?'green':'red',profitRing,'spark-profit');
-
-  // Waterfall
-  const wf=document.getElementById('chart-waterfall');if(wf){document.getElementById('waterfall-card').style.display='block';if(wfChart)wfChart.destroy();wfChart=new Chart(wf,{type:'bar',data:{labels:['Komisi','PPN','Spend','Profit'],datasets:[{data:[totKomisi,-totPPN,-totSpend,totProfit],backgroundColor:['#10b981','#f59e0b','#3b82f6',totProfit>=0?'#10b981':'#ef4444'],borderRadius:6}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>'Rp '+fmt(v)}}}}});}
-
-  // Sparklines
-  [['spark-spend',daily.map(d=>d.spend)],['spark-cost',daily.map(d=>d.totalCost)],['spark-komisi',daily.map(d=>d.komisi)],['spark-profit',daily.map(d=>d.profit)],['spark-shopee',daily.map((_,i)=>totShopee/daily.length)]].forEach(([id,data])=>{const el=document.getElementById(id);if(!el)return;if(el._c)el._c.destroy();el._c=new Chart(el,{type:'line',data:{labels:data,datasets:[{data,borderColor:'#7c3aed',borderWidth:1.5,tension:.4,pointRadius:0}]},options:{plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}}});});
-
-  // Charts existing
+    M('Total Spend','Rp '+fmt(totSpend),spendSub,'blue')+
+    M(`PPN (${ppnRate}%)`,'Rp '+fmt(totPPN),'biaya pajak','yellow')+
+    M('Total Biaya','Rp '+fmt(totCost),'spend + PPN','red')+
+    M('Klik Meta',fmt(totMetaClicks),'unique link clicks','')+
+    M('Klik Shopee',fmt(totShopee),'CTR: '+ctr+'%','')+
+    M('CVR Shopee',cvr+'%',fmt(totOrders)+' order','purple')+
+    M('Komisi Shopee','Rp '+fmt(totKomisiKotor),'komisi kotor','')+
+    M('Net Profit','Rp '+fmt(totProfit),'ROI: '+roi+'%',totProfit>=0?'green':'red');
+  // charts
   const labels=daily.map(d=>d.dt.slice(5));
-  if(chartDaily)chartDaily.destroy();chartDaily=new Chart(document.getElementById('chart-daily'),{type:'bar',data:{labels,datasets:[{label:'Biaya',data:daily.map(d=>d.totalCost),backgroundColor:'rgba(239,68,.6)'},{label:'Komisi',data:daily.map(d=>d.komisi),backgroundColor:'rgba(16,185,129,.6)'}]},options:{responsive:true,maintainAspectRatio:false}});
-  if(chartProfit)chartProfit.destroy();chartProfit=new Chart(document.getElementById('chart-profit'),{type:'bar',data:{labels,datasets:[{label:'Profit',data:daily.map(d=>d.profit),backgroundColor:daily.map(d=>d.profit>=0?'#10b981':'#ef4444')}]},options:{responsive:true,maintainAspectRatio:false}});
-
-  document.getElementById('dash-table-body').innerHTML=Object.values(ts).map(r=>`<tr><td>${esc(r.tag)}</td><td>${(mapping[r.tag]||[]).join(', ')}</td><td>${fmt(r.spend)}</td><td>${fmt(getPpnAmount(r.spend))}</td><td>${fmt(r.totalCost)}</td><td>-</td><td>${fmt(r.metaClicks)}</td><td>${fmt(r.shopeeClicks)}</td><td>${ctrB(r.metaClicks?r.shopeeClicks/r.metaClicks*100:null)}</td><td>${fmt(r.orders)}</td><td>${cvrB(r.cvr)}</td><td>${fmt(r.komisi)}</td><td>${roasB(r.roas)}</td><td style="color:${r.profit>=0?'#10b981':'#ef4444'}">${fmt(r.profit)}</td><td>${r.totalCost>0?(r.profit/r.totalCost*100).toFixed(1)+'%':'-'}</td><td>${statusB(r.profit,r.totalCost)}</td></tr>`).join('');
+  if(chartDaily)chartDaily.destroy();
+  chartDaily=new Chart(document.getElementById('chart-daily').getContext('2d'),{type:'bar',data:{labels,datasets:[{label:'Total Biaya (incl PPN)',data:daily.map(d=>Math.round(d.totalCost)),backgroundColor:'rgba(239,68,68,.5)',borderRadius:3},{label:'Komisi',data:daily.map(d=>Math.round(d.komisi)),backgroundColor:'rgba(16,185,129,.5)',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10}}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'Rp '+fmt(v),font:{size:10}}},x:{ticks:{font:{size:10}}}}}});
+  if(chartProfit)chartProfit.destroy();
+  chartProfit=new Chart(document.getElementById('chart-profit').getContext('2d'),{type:'bar',data:{labels,datasets:[{label:'Profit',data:daily.map(d=>Math.round(d.profit)),backgroundColor:daily.map(d=>d.profit>=0?'rgba(16,185,129,.75)':'rgba(239,68,68,.65)'),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false,ticks:{callback:v=>'Rp '+fmt(v),font:{size:10}}},x:{ticks:{font:{size:10}}}}}});
+  renderDashTable(ts);
+  renderDailyPerfTable(daily, from, to);
+  renderOrderStatus(from, to);
 }
-function setPreset(p,el){document.querySelectorAll('.date-preset').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderDashboard();}
 
+function renderDailyPerfTable(daily, from, to) {
+  // Shopee Clicks per day (from rawClicks)
+  const dayClicks = {};
+  rawClicks.forEach(r => {
+    const dt = (r['Waktu Klik']||'').slice(0,10);
+    if (!inRange(dt, from, to)) return;
+    dayClicks[dt] = (dayClicks[dt]||0) + 1;
+  });
+
+  // Unique orders per day (deduplicate by ID Pemesanan)
+  const dayOrders = {};   // dt -> Set of order IDs
+  rawOrders.forEach(r => {
+    if (r['Status Pesanan'] === 'Dibatalkan') return;
+    const dt = (r['Waktu Pemesanan']||'').slice(0,10);
+    if (!inRange(dt, from, to)) return;
+    if (!dayOrders[dt]) dayOrders[dt] = new Set();
+    dayOrders[dt].add(r['ID Pemesanan'] || '_' + dt + Math.random());
+  });
+
+  // Update header to include Komisi Kotor column
+  const tableHeader = document.querySelector('#daily-perf-body')?.closest('table')?.querySelector('thead tr');
+  if (tableHeader) {
+    tableHeader.innerHTML = `
+      <th>Tanggal</th>
+      <th>Shopee Clicks</th>
+      <th>Pesanan</th>
+      <th>Komisi Kotor</th>
+      <th>Komisi Bersih</th>
+      <th>Ad Spend (+PPN)</th>
+      <th>Profit Bersih</th>
+      <th>ROI</th>
+      <th>ROAS</th>`;
+  }
+
+  // Sort descending (newest first)
+  const rows = [...daily].sort((a,b) => b.dt.localeCompare(a.dt));
+
+  if (!rows.length) {
+    document.getElementById('daily-perf-body').innerHTML =
+      '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:20px">Belum ada data</td></tr>';
+    document.getElementById('daily-perf-foot').innerHTML = '';
+    return;
+  }
+
+  function fmtDt(dt) {
+    const d = new Date(dt + 'T00:00:00');
+    return d.toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'});
+  }
+
+  document.getElementById('daily-perf-body').innerHTML = rows.map(r => {
+    const sc = dayClicks[r.dt] || 0;
+    const ord = dayOrders[r.dt] ? dayOrders[r.dt].size : 0;
+    const roas = r.totalCost > 0 ? r.komisi / r.totalCost : null;
+    const roiStr = r.totalCost > 0 ? (r.profit/r.totalCost*100).toFixed(2)+'%' : '-';
+    const roasStr = roas !== null ? roas.toFixed(2)+'x' : '-';
+    const roasCls = roas !== null ? (roas>=1.5?'cvr-high':roas>=1?'cvr-mid':'cvr-low') : '';
+    const profitCls = r.profit >= 0 ? 'daily-profit-pos' : 'daily-profit-neg';
+    const profitStr = (r.profit >= 0 ? 'Rp ' : '- Rp ') + fmt(Math.abs(r.profit));
+    const roiCls = r.profit >= 0 ? 'cvr-high' : 'cvr-low';
+    return `<tr>
+      <td style="font-weight:500;white-space:nowrap">${fmtDt(r.dt)}</td>
+      <td>${fmt(sc)}</td>
+      <td>${fmt(ord)}</td>
+      <td style="color:#d97706;font-weight:600">Rp ${fmt(r.komisiKotor||r.komisi)}</td>
+      <td class="daily-komisi">Rp ${fmt(r.komisi)}</td>
+      <td class="daily-spend">Rp ${fmt(r.totalCost)}</td>
+      <td class="${profitCls}">${profitStr}</td>
+      <td class="${roiCls}">${roiStr}</td>
+      <td class="${roasCls}">${roasStr}</td>
+    </tr>`;
+  }).join('');
+
+  // Footer totals
+  const totSc = rows.reduce((s,r) => s + (dayClicks[r.dt]||0), 0);
+  const totOrd = rows.reduce((s,r) => s + (dayOrders[r.dt]?dayOrders[r.dt].size:0), 0);
+  const totKomisiKotor = rows.reduce((s,r) => s + (r.komisiKotor||r.komisi), 0);
+  const totKomisi = rows.reduce((s,r) => s + r.komisi, 0);
+  const totCost = rows.reduce((s,r) => s + r.totalCost, 0);
+  const totProfit = rows.reduce((s,r) => s + r.profit, 0);
+  const totRoi = totCost > 0 ? (totProfit/totCost*100).toFixed(2)+'%' : '-';
+  const totRoas = totCost > 0 ? (totKomisi/totCost).toFixed(2)+'x' : '-';
+  const totRoasCls = totCost > 0 ? (totKomisi/totCost>=1.5?'cvr-high':totKomisi/totCost>=1?'cvr-mid':'cvr-low') : '';
+  const totProfitCls = totProfit >= 0 ? 'daily-profit-pos' : 'daily-profit-neg';
+  const totProfitStr = (totProfit >= 0 ? 'Rp ' : '- Rp ') + fmt(Math.abs(totProfit));
+  const totRoiCls = totProfit >= 0 ? 'cvr-high' : 'cvr-low';
+  document.getElementById('daily-perf-foot').innerHTML = `<tr>
+    <td>TOTAL (${rows.length} hari)</td>
+    <td>${fmt(totSc)}</td>
+    <td>${fmt(totOrd)}</td>
+    <td style="color:#d97706;font-weight:700">Rp ${fmt(totKomisiKotor)}</td>
+    <td class="daily-komisi" style="font-weight:700">Rp ${fmt(totKomisi)}</td>
+    <td class="daily-spend" style="font-weight:700">Rp ${fmt(totCost)}</td>
+    <td class="${totProfitCls}">${totProfitStr}</td>
+    <td class="${totRoiCls}">${totRoi}</td>
+    <td class="${totRoasCls}">${totRoas}</td>
+  </tr>`;
+}
+
+function renderOrderStatus(from, to) {
+  // Count UNIQUE orders (by ID Pemesanan) per status
+  const statusOrders = {};   // status -> Set of order IDs
+  const statusKomisi = {};   // status -> total komisi bersih
+  rawOrders.forEach(r => {
+    const dt = (r['Waktu Pemesanan']||'').slice(0,10);
+    if (!inRange(dt, from, to)) return;
+    const st = r['Status Pesanan'] || 'Tidak Diketahui';
+    const oid = r['ID Pemesanan'] || ('_'+Math.random());
+    if (!statusOrders[st]) statusOrders[st] = new Set();
+    statusOrders[st].add(oid);
+    statusKomisi[st] = (statusKomisi[st]||0) + parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);
+  });
+
+  const statusConfig = [
+    { key:'Selesai',       label:'Selesai',         cls:'selesai',    icon:'✅' },
+    { key:'Diproses',      label:'Diproses',         cls:'diproses',   icon:'🔄' },
+    { key:'Dikirim',       label:'Dikirim',          cls:'diproses',   icon:'🚚' },
+    { key:'Tertunda',      label:'Tertunda',         cls:'pending',    icon:'⏳' },
+    { key:'Belum Dibayar', label:'Belum Dibayar',    cls:'pending',    icon:'⏳' },
+    { key:'Belum Bayar',   label:'Belum Bayar',      cls:'pending',    icon:'⏳' },
+    { key:'Dibatalkan',    label:'Dibatalkan',       cls:'dibatalkan', icon:'❌' },
+    { key:'Pengembalian',  label:'Pengembalian',     cls:'dibatalkan', icon:'↩️' },
+  ];
+  const known = statusConfig.map(s => s.key);
+  const others = Object.keys(statusOrders).filter(k => !known.includes(k));
+  const allConfigs = [
+    ...statusConfig.filter(s => statusOrders[s.key] !== undefined),
+    ...others.map(k => ({ key:k, label:k, cls:'pending', icon:'📦' }))
+  ];
+  if (!allConfigs.length) {
+    document.getElementById('order-status-grid').innerHTML =
+      '<p style="font-size:13px;color:var(--text3)">Belum ada data pesanan.</p>';
+    return;
+  }
+  document.getElementById('order-status-grid').innerHTML = allConfigs.map(cfg => {
+    const count = statusOrders[cfg.key] ? statusOrders[cfg.key].size : 0;
+    const komisi = statusKomisi[cfg.key] || 0;
+    return `<div class="order-status-card ${cfg.cls}">
+      <div class="os-label">${cfg.icon} ${cfg.label}</div>
+      <div class="os-count">${fmt(count)} pesanan</div>
+      <div class="os-komisi">Komisi: Rp ${fmt(komisi)}</div>
+    </div>`;
+  }).join('');
+}
+function renderDashTable(ts){
+  if(!ts){const{from,to}=getDateRange();ts=computeTagStats(from,to);}
+  const by=document.getElementById('sort-dash')?.value||'profit';
+  const rows=Object.values(ts).sort((a,b)=>{
+    if(by==='spend')return b.spend-a.spend;if(by==='komisi')return b.komisi-a.komisi;
+    if(by==='roi')return(b.roi||0)-(a.roi||0);if(by==='cvr')return(b.cvr||0)-(a.cvr||0);
+    if(by==='roas')return(b.roas||0)-(a.roas||0);if(by==='cpr')return(a.cpr||Infinity)-(b.cpr||Infinity);
+    return b.profit-a.profit;
+  });
+  document.getElementById('dash-table-body').innerHTML=rows.map(r=>{
+    const ip=r.totalCost>0&&r.profit>r.totalCost*.05,il=r.totalCost>0&&r.profit<-r.totalCost*.05;
+    const bg=ip?'background:rgba(16,185,129,.07)':il?'background:rgba(239,68,68,.07)':'';
+    return`<tr style="${bg}">
+      <td><span class="tag-badge tag-badge-btn" onclick="openTagModal('${enc(r.tag)}')" title="Klik untuk detail">${esc(r.tag)} ↗</span></td>
+      <td style="font-size:11px;color:var(--text2);max-width:180px">${r.campaigns.length?r.campaigns.join('<br>'):'<em style="color:var(--text3)">Belum mapping</em>'}</td>
+      <td>${fmt(r.spend)}</td>
+      <td style="color:var(--yellow)">${ppnRate>0?fmt(r.ppnAmount):'-'}</td>
+      <td style="font-weight:600">${fmt(r.totalCost)}</td>
+      <td style="color:var(--text2)">${r.cpr!==null?'Rp '+fmt(r.cpr):'-'}</td>
+      <td>${fmt(r.metaClicks)}</td><td>${fmt(r.shopeeClicks)}</td><td>${ctrB(r.clickThru)}</td>
+      <td>${fmt(r.orders)}</td><td>${cvrB(r.cvr)}</td>
+      <td>${fmt(r.komisi)}</td>
+      ${roasCell(r.roas)}
+      <td style="font-weight:700;color:${r.profit>=0?'var(--green)':'var(--red)'}">${r.profit>=0?'+':''}${fmt(r.profit)}</td>
+      <td>${r.roi!==null?r.roi.toFixed(1)+'%':'-'}</td>
+      <td>${statusB(r.profit,r.totalCost)}</td>
+    </tr>`;
+  }).join('');
+}
+function roasCell(v){return`<td>${roasB(v)}</td>`;}
+
+// ============================================================
+// DETAIL
+// ============================================================
+function renderDetailPage(){
+  const camps=getUniqueCampaigns();
+  const sel=document.getElementById('detail-campaign');
+  if(sel.options.length<=1)camps.forEach(c=>{sel.appendChild(new Option(c,c));});
+  const selC=sel.value;
+  const from=document.getElementById('detail-from')?.value||'';
+  const to=document.getElementById('detail-to')?.value||'';
+  const dates=[...new Set([...rawMeta.map(r=>(r['date_start']||'').slice(0,10)),...rawOrders.map(r=>(r['Waktu Pemesanan']||'').slice(0,10))].filter(Boolean))].sort();
+  const rows=[];
+  getUniqueTags().forEach(tag=>{
+    const tagCamps=mapping[tag]||[];
+    if(selC&&!tagCamps.includes(selC))return;
+    const fc=selC?[selC]:tagCamps;
+    dates.forEach(dt=>{
+      if(!inRange(dt,from,to))return;
+      let spend=0,mc=0;
+      fc.forEach(c=>rawMeta.filter(r=>r['campaign_name']===c&&(r['date_start']||'').slice(0,10)===dt).forEach(r=>{spend+=parseFloat(r['spend']||0);mc+=parseFloat(r['link_clicks']||0);}));
+      let orders=0,komisi=0,sc=0;
+      rawOrders.filter(r=>(r['Tag_link1']||'').trim()===tag&&(r['Waktu Pemesanan']||'').slice(0,10)===dt&&r['Status Pesanan']!=='Dibatalkan').forEach(r=>{orders++;komisi+=parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);});
+      rawClicks.filter(r=>extractBaseTag(r['Tag_link']||'')===tag&&(r['Waktu Klik']||'').slice(0,10)===dt).forEach(()=>sc++);
+      if(!spend&&!komisi&&!sc)return;
+      const ppnA=getPpnAmount(spend),tc=getTotalCost(spend),profit=komisi-tc;
+      rows.push({dt,tag,campaigns:fc,spend,ppnA,tc,mc,sc,orders,komisi,profit,roas:tc>0?komisi/tc:null,roi:tc>0?profit/tc*100:null,cvr:sc>0?orders/sc*100:null,ctr:mc>0?sc/mc*100:null});
+    });
+  });
+  const tS=rows.reduce((s,r)=>s+r.spend,0),tPPN=rows.reduce((s,r)=>s+r.ppnA,0),tC=rows.reduce((s,r)=>s+r.tc,0);
+  const tK=rows.reduce((s,r)=>s+r.komisi,0),tP=tK-tC,tO=rows.reduce((s,r)=>s+r.orders,0);
+  const tM=rows.reduce((s,r)=>s+r.mc,0),tSh=rows.reduce((s,r)=>s+r.sc,0);
+  document.getElementById('detail-metrics').innerHTML=
+    M('Total Spend','Rp '+fmt(tS),'','blue')+M('PPN','Rp '+fmt(tPPN),ppnRate+'%','yellow')+
+    M('Total Biaya','Rp '+fmt(tC),'incl PPN','red')+M('Klik Meta',fmt(tM),'','')+
+    M('Klik Shopee',fmt(tSh),'CTR: '+(tM>0?(tSh/tM*100).toFixed(1):'-')+'%','')+
+    M('CVR',(tSh>0?(tO/tSh*100).toFixed(1):'-')+'%',fmt(tO)+' order','purple')+
+    M('Komisi','Rp '+fmt(tK),'','')+M('Net Profit','Rp '+fmt(tP),tC>0?(tP/tC*100).toFixed(1)+'% ROI':'',tP>=0?'green':'red');
+  document.getElementById('detail-table-body').innerHTML=rows.map(r=>{
+    const ip=r.tc>0&&r.profit>r.tc*.05,il=r.tc>0&&r.profit<-r.tc*.05;
+    const bg=ip?'background:rgba(16,185,129,.07)':il?'background:rgba(239,68,68,.07)':'';
+    return`<tr style="${bg}">
+      <td>${r.dt}</td>
+      <td style="font-size:11px;color:var(--text2);max-width:160px">${r.campaigns.join(', ')}</td>
+      <td><span class="tag-badge tag-badge-btn" onclick="openTagModal('${enc(r.tag)}')">${esc(r.tag)} ↗</span></td>
+      <td>${fmt(r.spend)}</td><td style="color:var(--yellow)">${ppnRate>0?fmt(r.ppnA):'-'}</td>
+      <td style="font-weight:600">${fmt(r.tc)}</td>
+      <td>${fmt(r.mc)}</td><td>${fmt(r.sc)}</td><td>${ctrB(r.ctr)}</td>
+      <td>${fmt(r.orders)}</td><td>${cvrB(r.cvr)}</td>
+      <td>${fmt(r.komisi)}</td>${roasCell(r.roas)}
+      <td style="font-weight:700;color:${r.profit>=0?'var(--green)':'var(--red)'}">${r.profit>=0?'+':''}${fmt(r.profit)}</td>
+      <td>${r.roi!==null?r.roi.toFixed(1)+'%':'-'}</td>
+      <td>${statusB(r.profit,r.tc)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================================================
+// TAGS PAGE
+// ============================================================
+function renderTagsPage(){
+  const from=document.getElementById('tags-from')?.value||'';
+  const to=document.getElementById('tags-to')?.value||'';
+  const ts=computeTagStats(from||null,to||null);
+  const rows=Object.values(ts).sort((a,b)=>b.komisi-a.komisi);
+  const tK=rows.reduce((s,r)=>s+r.komisi,0),tCl=rows.reduce((s,r)=>s+r.shopeeClicks,0);
+  const tO=rows.reduce((s,r)=>s+r.orders,0),tC=rows.reduce((s,r)=>s+r.totalCost,0),tM=rows.reduce((s,r)=>s+r.metaClicks,0);
+  document.getElementById('tags-metrics').innerHTML=
+    M('Tag Aktif',rows.length,'unique tags','')+M('Klik Meta',fmt(tM),'','blue')+
+    M('Klik Shopee',fmt(tCl),'CTR: '+(tM>0?(tCl/tM*100).toFixed(1):'-')+'%','')+
+    M('CVR Overall',(tCl>0?(tO/tCl*100).toFixed(1):'-')+'%',fmt(tO)+' order','purple')+
+    M('Total Komisi','Rp '+fmt(tK),'','green')+M('Total Biaya','Rp '+fmt(tC),'incl PPN '+ppnRate+'%','red');
+  const top10=rows.slice(0,10);
+  if(chartTagKomisi)chartTagKomisi.destroy();
+  chartTagKomisi=new Chart(document.getElementById('chart-tag-komisi').getContext('2d'),{type:'bar',indexAxis:'y',data:{labels:top10.map(r=>r.tag),datasets:[{label:'Komisi',data:top10.map(r=>Math.round(r.komisi)),backgroundColor:'rgba(124,58,237,.7)',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>'Rp '+fmt(v),font:{size:10}}},y:{ticks:{font:{size:10}}}}}});
+  const top10cvr=[...rows].filter(r=>r.cvr!==null).sort((a,b)=>b.cvr-a.cvr).slice(0,10);
+  if(chartTagCvr)chartTagCvr.destroy();
+  chartTagCvr=new Chart(document.getElementById('chart-tag-cvr').getContext('2d'),{type:'bar',indexAxis:'y',data:{labels:top10cvr.map(r=>r.tag),datasets:[{label:'CVR %',data:top10cvr.map(r=>parseFloat(r.cvr.toFixed(2))),backgroundColor:'rgba(16,185,129,.7)',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>v+'%',font:{size:10}}},y:{ticks:{font:{size:10}}}}}});
+  document.getElementById('tags-table-body').innerHTML=rows.map(r=>`<tr>
+    <td><span class="tag-badge tag-badge-btn" onclick="openTagModal('${enc(r.tag)}')">${esc(r.tag)} ↗</span></td>
+    <td>${fmt(r.metaClicks)}</td><td>${fmt(r.shopeeClicks)}</td><td>${ctrB(r.clickThru)}</td>
+    <td>${fmt(r.orders)}</td><td>${cvrB(r.cvr)}</td><td>${fmt(r.komisi)}</td>
+    <td>${r.totalCost>0?`${fmt(r.spend)} <span style="color:var(--yellow);font-size:10px">+PPN ${fmt(r.ppnAmount)}</span>`:'<span style="color:var(--text3)">Belum mapping</span>'}</td>
+    <td style="font-weight:700;color:${r.profit>=0?'var(--green)':'var(--red)'}">${r.totalCost>0?(r.profit>=0?'+':'')+fmt(r.profit):'<span style="color:var(--text3)">-</span>'}</td>
+    <td>${r.roi!==null?r.roi.toFixed(1)+'%':'-'}</td>
+    <td>${r.totalCost>0?statusB(r.profit,r.totalCost):'<span class="badge badge-pending">Belum mapping</span>'}</td>
+  </tr>`).join('');
+}
+
+// ============================================================
+// TAG DETAIL MODAL
+// ============================================================
+function openTagModal(encodedTag){
+  const tag=dec(encodedTag);
+  modalTag=tag;
+  document.getElementById('modal-tag-name').textContent=tag;
+  const camps=mapping[tag]||[];
+  document.getElementById('modal-campaigns').innerHTML=camps.length
+    ?camps.map(c=>`<span class="camp-pill">📢 ${esc(c)}</span>`).join('')
+    :'<span class="camp-pill" style="color:var(--text3)">Belum di-mapping</span>';
+  // set 7 hari preset
+  document.querySelectorAll('.modal-preset').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.modal-preset[data-days="7"]').classList.add('active');
+  applyModalPreset(7);
+  document.getElementById('tag-modal').classList.remove('hidden');
+  document.body.style.overflow='hidden';
+}
+function applyModalPreset(days){
+  const yd=new Date();yd.setDate(yd.getDate()-1);const ydStr=yd.toISOString().slice(0,10);
+  if(days===0){document.getElementById('modal-from').value='';document.getElementById('modal-to').value='';}
+  else{const d=new Date(yd);d.setDate(d.getDate()-(days-1));document.getElementById('modal-from').value=d.toISOString().slice(0,10);document.getElementById('modal-to').value=ydStr;}
+  renderModal();
+}
+function closeModal(){
+  document.getElementById('tag-modal').classList.add('hidden');
+  document.body.style.overflow='';
+  if(modalChartSpend){modalChartSpend.destroy();modalChartSpend=null;}
+  if(modalChartProfit){modalChartProfit.destroy();modalChartProfit=null;}
+  modalTag=null;
+}
+function renderModal(){
+  const tag=modalTag;if(!tag)return;
+  const from=document.getElementById('modal-from').value||null;
+  const to=document.getElementById('modal-to').value||null;
+  const camps=mapping[tag]||[];
+  const allDates=[...new Set([
+    ...rawMeta.map(r=>(r['date_start']||'').slice(0,10)),
+    ...rawOrders.map(r=>(r['Waktu Pemesanan']||'').slice(0,10)),
+    ...rawClicks.map(r=>(r['Waktu Klik']||'').slice(0,10))
+  ].filter(Boolean))].sort();
+  const rows=[];
+  allDates.forEach(dt=>{
+    if(!inRange(dt,from,to))return;
+    let spend=0,mc=0,results=0;
+    camps.forEach(c=>rawMeta.filter(r=>r['campaign_name']===c&&(r['date_start']||'').slice(0,10)===dt).forEach(r=>{spend+=parseFloat(r['spend']||0);mc+=parseFloat(r['link_clicks']||0);results+=parseFloat(r['results']||0);}));
+    let orders=0,komisi=0,sc=0;
+    rawOrders.filter(r=>(r['Tag_link1']||'').trim()===tag&&(r['Waktu Pemesanan']||'').slice(0,10)===dt&&r['Status Pesanan']!=='Dibatalkan').forEach(r=>{orders++;komisi+=parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);});
+    rawClicks.filter(r=>extractBaseTag(r['Tag_link']||'')===tag&&(r['Waktu Klik']||'').slice(0,10)===dt).forEach(()=>sc++);
+    if(!spend&&!komisi&&!sc)return;
+    const ppnA=getPpnAmount(spend),tc=getTotalCost(spend),profit=komisi-tc;
+    rows.push({dt,spend,ppnA,tc,mc,sc,orders,komisi,profit,results,cpr:results>0?spend/results:null,roas:tc>0?komisi/tc:null,roi:tc>0?profit/tc*100:null,cvr:sc>0?orders/sc*100:null,ctr:mc>0?sc/mc*100:null});
+  });
+  const tS=rows.reduce((s,r)=>s+r.spend,0),tC=rows.reduce((s,r)=>s+r.tc,0);
+  const tK=rows.reduce((s,r)=>s+r.komisi,0),tP=tK-tC,tO=rows.reduce((s,r)=>s+r.orders,0);
+  const tSh=rows.reduce((s,r)=>s+r.sc,0),tM=rows.reduce((s,r)=>s+r.mc,0);
+  const tR=rows.reduce((s,r)=>s+r.results,0),tCPR=tR>0?tS/tR:null;
+  const roas=tC>0?tK/tC:null;
+  document.getElementById('modal-metrics').innerHTML=
+    M('Spend','Rp '+fmt(tS),'sebelum PPN','blue')+
+    M('Total Biaya','Rp '+fmt(tC),'incl PPN '+ppnRate+'%','red')+
+    M('CPR','Rp '+fmt(tCPR||0),tR>0?fmt(tR)+' results':'','yellow')+
+    M('Klik Meta',fmt(tM),'CTR: '+(tM>0?(tSh/tM*100).toFixed(1):'-')+'%','')+
+    M('Klik Shopee',fmt(tSh),'','')+
+    M('Order',fmt(tO),'CVR: '+(tSh>0?(tO/tSh*100).toFixed(1):'-')+'%','purple')+
+    M('Komisi','Rp '+fmt(tK),'','')+
+    M('ROAS',roas!==null?roas.toFixed(2)+'x':'-','',roas!==null?(roas>=1.5?'green':roas>=1?'yellow':'red'):'')+
+    M('Net Profit','Rp '+fmt(tP),(tC>0?(tP/tC*100).toFixed(1)+'% ROI':''),tP>=0?'green':'red');
+  // charts
+  const lbls=rows.map(r=>r.dt.slice(5));
+  if(modalChartSpend)modalChartSpend.destroy();
+  modalChartSpend=new Chart(document.getElementById('modal-chart-spend').getContext('2d'),{type:'bar',data:{labels:lbls,datasets:[{label:'Total Biaya',data:rows.map(r=>Math.round(r.tc)),backgroundColor:'rgba(239,68,68,.5)',borderRadius:3},{label:'Komisi',data:rows.map(r=>Math.round(r.komisi)),backgroundColor:'rgba(16,185,129,.5)',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10}}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'Rp '+fmt(v),font:{size:10}}},x:{ticks:{font:{size:10}}}}}});
+  if(modalChartProfit)modalChartProfit.destroy();
+  modalChartProfit=new Chart(document.getElementById('modal-chart-profit').getContext('2d'),{type:'bar',data:{labels:lbls,datasets:[{label:'Profit',data:rows.map(r=>Math.round(r.profit)),backgroundColor:rows.map(r=>r.profit>=0?'rgba(16,185,129,.75)':'rgba(239,68,68,.65)'),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false,ticks:{callback:v=>'Rp '+fmt(v),font:{size:10}}},x:{ticks:{font:{size:10}}}}}});
+  // table
+  document.getElementById('modal-table-body').innerHTML=rows.map(r=>{
+    const ip=r.tc>0&&r.profit>r.tc*.05,il=r.tc>0&&r.profit<-r.tc*.05;
+    const bg=ip?'background:rgba(16,185,129,.07)':il?'background:rgba(239,68,68,.07)':'';
+    return`<tr style="${bg}">
+      <td style="white-space:nowrap;font-weight:500">${r.dt}</td>
+      <td>${fmt(r.spend)}</td><td style="color:var(--yellow)">${ppnRate>0?fmt(r.ppnA):'-'}</td>
+      <td style="font-weight:600">${fmt(r.tc)}</td>
+      <td style="color:var(--text2)">${r.cpr!==null?'Rp '+fmt(r.cpr):'-'}</td>
+      <td>${fmt(r.mc)}</td><td>${fmt(r.sc)}</td><td>${ctrB(r.ctr)}</td>
+      <td>${fmt(r.orders)}</td><td>${cvrB(r.cvr)}</td>
+      <td>${fmt(r.komisi)}</td>${roasCell(r.roas)}
+      <td style="font-weight:700;color:${r.profit>=0?'var(--green)':'var(--red)'}">${r.profit>=0?'+':''}${fmt(r.profit)}</td>
+      <td>${r.roi!==null?r.roi.toFixed(1)+'%':'-'}</td>
+      <td>${statusB(r.profit,r.tc)}</td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="15" style="text-align:center;color:var(--text3);padding:20px">Tidak ada data pada periode ini</td></tr>';
+}
+
+// Modal event listeners — clean, no conflicts
+document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+document.getElementById('tag-modal').addEventListener('click', function(e){ if(e.target===this)closeModal(); });
+document.getElementById('modal-presets').addEventListener('click', function(e){
+  const btn=e.target.closest('.modal-preset');if(!btn)return;
+  document.querySelectorAll('.modal-preset').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyModalPreset(parseInt(btn.dataset.days));
+});
+document.getElementById('modal-from').addEventListener('change', renderModal);
+document.getElementById('modal-to').addEventListener('change', renderModal);
+document.addEventListener('keydown', e=>{ if(e.key==='Escape')closeModal(); });
+
+// ============================================================
 // INIT
+// ============================================================
 updatePpnUi();
 </script>
 </body>
