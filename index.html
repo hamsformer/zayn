@@ -1200,8 +1200,8 @@ function renderMappingSummary(){
   const mapped=tags.filter(t=>mapping[t]?.length);
   const unmapped=tags.filter(t=>!mapping[t]?.length);
   let html=`<div style="font-size:12px;color:var(--text2);margin-bottom:10px">${mapped.length}/${tags.length} tag sudah di-mapping</div>`;
-  html+=mapped.map(t=>`<div style="margin-bottom:7px;padding:8px 10px;background:#f9fafb;border-radius:8px;font-size:12px"><span class="tag-badge" style="margin-right:6px">${esc(t)}</span><span style="color:var(--text2)">→ ${esc(mapping[t].join(' / '))}</span></div>`).join('');
-  if(unmapped.length)html+=`<div style="font-size:12px;color:var(--text3);margin-top:10px;line-height:1.9">⚠️ Belum mapping:<br>${unmapped.map(t=>`<span class="tag-badge" style="margin:2px">${esc(t)}</span>`).join('')}</div>`;
+  html+=mapped.map(t=>`<div style="margin-bottom:7px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;font-size:12px;display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap"><span class="tag-badge" style="flex-shrink:0">${esc(t)}</span><span style="color:#e2e8f0;font-weight:500;line-height:1.6">→ ${esc(mapping[t].join(' / '))}</span></div>`).join('');
+  if(unmapped.length)html+=`<div style="font-size:12px;color:var(--text2);margin-top:12px;line-height:1.9">⚠️ Belum mapping:<br>${unmapped.map(t=>`<span class="tag-badge" style="margin:2px;opacity:.6">${esc(t)}</span>`).join('')}</div>`;
   document.getElementById('mapping-summary').innerHTML=html;
 }
 
