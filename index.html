@@ -220,6 +220,14 @@ tfoot tr td{font-weight:700;background:#f9fafb;border-top:2px solid var(--border
 </nav>
 
 <div class="ppn-bar">
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+      <label style="font-size:12px;color:#9ca3af">Mode Tanggal:</label>
+      <select id="date-mode" onchange="setDateMode(this.value)" style="padding:4px 8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:6px;color:#fff;font-size:12px">
+        <option value="pesan">By Pesan (Akuntansi)</option>
+        <option value="klik">By Klik (Shopee)</option>
+      </select>
+    </div>
+
   <label>PPN Iklan Meta:</label>
   <input type="number" id="ppn-input" value="11" min="0" max="100" step="0.5" oninput="onPpnChange()">
   <span style="color:#6b7280;font-size:12px">%</span>
@@ -630,7 +638,7 @@ function renderAlertPage(){
   // Get all dates in range
   const allDates=[...new Set([
     ...rawMeta.map(r=>(r['date_start']||'').slice(0,10)),
-    ...rawOrders.map(r=>(r['Waktu Pemesanan']||'').slice(0,10))
+    ...rawOrders.map(r=>getOrderDate(r))
   ].filter(Boolean))].filter(d=>inRange(d,from,to)).sort();
 
   // Build daily profit per tag
@@ -645,7 +653,7 @@ function renderAlertPage(){
       const tc=getTotalCost(spend);
       // unique orders komisi
       const orderK={};
-      rawOrders.filter(r=>(r['Tag_link1']||'').trim()===tag&&(r['Waktu Pemesanan']||'').slice(0,10)===dt&&r['Status Pesanan']!=='Dibatalkan').forEach(r=>{
+      rawOrders.filter(r=>(r['Tag_link1']||'').trim()===tag&&getOrderDate(r)===dt&&r['Status Pesanan']!=='Dibatalkan').forEach(r=>{
         const oid=r['ID Pemesanan'];
         if(!orderK[oid])orderK[oid]=0;
         orderK[oid]+=parseFloat(r['Total Komisi per Produk(Rp)']||0);
@@ -730,7 +738,7 @@ function renderHourlyPage(){
   const orderIds=new Set();
   rawOrders.forEach(r=>{
     if(r['Status Pesanan']==='Dibatalkan')return;
-    const dt=(r['Waktu Pemesanan']||'').slice(0,10);
+    const dt=getOrderDate(r);
     if(!inRange(dt,from,to))return;
     const oid=r['ID Pemesanan'];
     if(orderIds.has(oid))return;
@@ -808,7 +816,7 @@ function renderProductsPage(){
   const prodMap={};  // key = tag+'||'+idBarang
   rawOrders.forEach(r=>{
     if(r['Status Pesanan']==='Dibatalkan')return;
-    const dt=(r['Waktu Pemesanan']||'').slice(0,10);
+    const dt=getOrderDate(r);
     if(!inRange(dt,from,to))return;
     const tag=(r['Tag_link1']||'').trim();if(!tag||tag==='Ada')return;
     if(selTag&&tag!==selTag)return;
@@ -858,6 +866,10 @@ function renderProductsPage(){
 // ============================================================
 // META COLUMN NORMALIZER
 // ============================================================
+
+let dateMode = localStorage.getItem('dateMode')||'pesan';
+function setDateMode(m){dateMode=m;localStorage.setItem('dateMode',m);document.getElementById('date-mode').value=m;rerenderAll();}
+function getOrderDate(r){const d = dateMode==='klik' ? (r['Waktu Klik']||r['Waktu Pemesanan']||'') : (r['Waktu Pemesanan']||''); return d.slice(0,10);}
 const META_COL_MAP={
   'Reporting starts':'date_start','Reporting ends':'date_end','Campaign name':'campaign_name',
   'Amount spent (IDR)':'spend','Unique link clicks':'link_clicks','Impressions':'impressions',
@@ -1103,7 +1115,7 @@ function computeTagStats(from,to){
   rawOrders.forEach(r=>{
     if(r['Status Pesanan']==='Dibatalkan')return;
     let tag=(r['Tag_link1']||'').trim();if(!tag) tag='Tanpa Tag';if(tag==='Ada') tag='Tanpa Tag';
-    const dt=(r['Waktu Pemesanan']||'').slice(0,10);if(!inRange(dt,from,to))return;
+    const dt=getOrderDate(r);if(!inRange(dt,from,to))return;
     const oid=r['ID Pemesanan']||'';
     const key=tag+'||'+oid;
     if(!orderKomisi[key]){orderKomisi[key]={tag,dt,oid,bersih:0,kotor:0};}
@@ -1149,7 +1161,7 @@ function computeDailyStats(from,to){
   const orderDaily={};  // key= dt+'||'+oid -> {bersih,kotor}
   rawOrders.forEach(r=>{
     if(r['Status Pesanan']==='Dibatalkan')return;
-    const dt=(r['Waktu Pemesanan']||'').slice(0,10);if(!inRange(dt,from,to))return;
+    const dt=getOrderDate(r);if(!inRange(dt,from,to))return;
     const oid=r['ID Pemesanan']||('_'+Math.random());
     const key=dt+'||'+oid;
     if(!orderDaily[key])orderDaily[key]={dt,bersih:0,kotor:0};
@@ -1224,7 +1236,7 @@ function renderDailyPerfTable(daily, from, to) {
   const dayOrders = {};   // dt -> Set of order IDs
   rawOrders.forEach(r => {
     if (r['Status Pesanan'] === 'Dibatalkan') return;
-    const dt = (r['Waktu Pemesanan']||'').slice(0,10);
+    const dt = getOrderDate(r);
     if (!inRange(dt, from, to)) return;
     if (!dayOrders[dt]) dayOrders[dt] = new Set();
     dayOrders[dt].add(r['ID Pemesanan'] || '_' + dt + Math.random());
@@ -1314,7 +1326,7 @@ function renderOrderStatus(from, to) {
   const statusOrders = {};   // status -> Set of order IDs
   const statusKomisi = {};   // status -> total komisi bersih
   rawOrders.forEach(r => {
-    const dt = (r['Waktu Pemesanan']||'').slice(0,10);
+    const dt = getOrderDate(r);
     if (!inRange(dt, from, to)) return;
     const st = r['Status Pesanan'] || 'Tidak Diketahui';
     const oid = r['ID Pemesanan'] || ('_'+Math.random());
@@ -1395,7 +1407,7 @@ function renderDetailPage(){
   const selC=sel.value;
   const from=document.getElementById('detail-from')?.value||'';
   const to=document.getElementById('detail-to')?.value||'';
-  const dates=[...new Set([...rawMeta.map(r=>(r['date_start']||'').slice(0,10)),...rawOrders.map(r=>(r['Waktu Pemesanan']||'').slice(0,10))].filter(Boolean))].sort();
+  const dates=[...new Set([...rawMeta.map(r=>(r['date_start']||'').slice(0,10)),...rawOrders.map(r=>getOrderDate(r))].filter(Boolean))].sort();
   const rows=[];
   getUniqueTags().forEach(tag=>{
     const tagCamps=mapping[tag]||[];
@@ -1406,7 +1418,7 @@ function renderDetailPage(){
       let spend=0,mc=0;
       fc.forEach(c=>rawMeta.filter(r=>r['campaign_name']===c&&(r['date_start']||'').slice(0,10)===dt).forEach(r=>{spend+=parseFloat(r['spend']||0);mc+=parseFloat(r['link_clicks']||0);}));
       let orders=0,komisi=0,sc=0;
-      rawOrders.filter(r=>(r['Tag_link1']||'').trim()===tag&&(r['Waktu Pemesanan']||'').slice(0,10)===dt&&r['Status Pesanan']!=='Dibatalkan').forEach(r=>{orders++;komisi+=parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);});
+      rawOrders.filter(r=>(r['Tag_link1']||'').trim()===tag&&getOrderDate(r)===dt&&r['Status Pesanan']!=='Dibatalkan').forEach(r=>{orders++;komisi+=parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);});
       rawClicks.filter(r=>extractBaseTag(r['Tag_link']||'')===tag&&(r['Waktu Klik']||'').slice(0,10)===dt).forEach(()=>sc++);
       if(!spend&&!komisi&&!sc)return;
       const ppnA=getPpnAmount(spend),tc=getTotalCost(spend),profit=komisi-tc;
@@ -1511,7 +1523,7 @@ function renderModal(){
   const camps=mapping[tag]||[];
   const allDates=[...new Set([
     ...rawMeta.map(r=>(r['date_start']||'').slice(0,10)),
-    ...rawOrders.map(r=>(r['Waktu Pemesanan']||'').slice(0,10)),
+    ...rawOrders.map(r=>getOrderDate(r)),
     ...rawClicks.map(r=>(r['Waktu Klik']||'').slice(0,10))
   ].filter(Boolean))].sort();
   const rows=[];
@@ -1520,7 +1532,7 @@ function renderModal(){
     let spend=0,mc=0,results=0;
     camps.forEach(c=>rawMeta.filter(r=>r['campaign_name']===c&&(r['date_start']||'').slice(0,10)===dt).forEach(r=>{spend+=parseFloat(r['spend']||0);mc+=parseFloat(r['link_clicks']||0);results+=parseFloat(r['results']||0);}));
     let orders=0,komisi=0,sc=0;
-    rawOrders.filter(r=>(r['Tag_link1']||'').trim()===tag&&(r['Waktu Pemesanan']||'').slice(0,10)===dt&&r['Status Pesanan']!=='Dibatalkan').forEach(r=>{orders++;komisi+=parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);});
+    rawOrders.filter(r=>(r['Tag_link1']||'').trim()===tag&&getOrderDate(r)===dt&&r['Status Pesanan']!=='Dibatalkan').forEach(r=>{orders++;komisi+=parseFloat(r['Komisi Bersih Affiliate (Rp)']||0);});
     rawClicks.filter(r=>extractBaseTag(r['Tag_link']||'')===tag&&(r['Waktu Klik']||'').slice(0,10)===dt).forEach(()=>sc++);
     if(!spend&&!komisi&&!sc)return;
     const ppnA=getPpnAmount(spend),tc=getTotalCost(spend),profit=komisi-tc;
