@@ -162,6 +162,45 @@ tfoot tr td{font-weight:700;background:#f9fafb;border-top:2px solid var(--border
 .modal-chart-wrap{position:relative;height:185px;}
 .modal-table-wrap{overflow-x:auto;max-height:300px;overflow-y:auto;}
 .modal-table-wrap table{font-size:12px;}
+/* ALERT */
+.alert-banner{border-radius:12px;padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14px;}
+.alert-banner.loss{background:#fef2f2;border:1.5px solid #fca5a5;}
+.alert-banner.warn{background:#fffbeb;border:1.5px solid #fde68a;}
+.alert-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.alert-title{font-size:14px;font-weight:700;margin-bottom:3px;}
+.alert-banner.loss .alert-title{color:#dc2626;}
+.alert-banner.warn .alert-title{color:#d97706;}
+.alert-sub{font-size:12px;color:var(--text2);line-height:1.6;}
+.alert-days{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.alert-day-chip{font-size:11px;padding:2px 7px;border-radius:99px;background:#fee2e2;color:#dc2626;font-weight:600;}
+.alert-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:10px;}
+.alert-controls label{font-size:13px;font-weight:500;}
+.alert-controls input[type=number]{width:70px;padding:5px 9px;border:1px solid var(--border);border-radius:7px;font-size:13px;}
+.no-alert{text-align:center;padding:48px 24px;color:var(--text2);}
+.no-alert .ico{font-size:40px;margin-bottom:12px;}
+/* HOURLY */
+.heatmap-wrap{overflow-x:auto;}
+.heatmap{border-collapse:collapse;font-size:11px;min-width:700px;}
+.heatmap th{padding:5px 7px;color:var(--text2);font-weight:600;text-align:center;font-size:10px;}
+.heatmap td{padding:6px 5px;text-align:center;border-radius:4px;cursor:default;min-width:38px;}
+.hm-0{background:#f9fafb;color:var(--text3);}
+.hm-1{background:#dcfce7;color:#166534;}
+.hm-2{background:#86efac;color:#14532d;}
+.hm-3{background:#22c55e;color:#fff;}
+.hm-4{background:#15803d;color:#fff;font-weight:700;}
+.hm-loss{background:#fee2e2;color:#dc2626;}
+.hour-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px;}
+.hour-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center;}
+.hour-card .hc-label{font-size:11px;color:var(--text2);margin-bottom:4px;}
+.hour-card .hc-val{font-size:18px;font-weight:700;}
+.hour-card .hc-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+/* PRODUCTS */
+.prod-filter{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
+.prod-filter select,.prod-filter input{padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--card);}
+.prod-rank{display:inline-block;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;text-align:center;line-height:24px;flex-shrink:0;}
+.prod-rank.gold{background:#f59e0b;}
+.prod-rank.silver{background:#9ca3af;}
+.prod-rank.bronze{background:#b45309;}
 </style>
 </head>
 <body>
@@ -174,6 +213,9 @@ tfoot tr td{font-weight:700;background:#f9fafb;border-top:2px solid var(--border
     <button class="nav-tab" onclick="showPage('dashboard',this)">Dashboard</button>
     <button class="nav-tab" onclick="showPage('detail',this)">Detail Iklan</button>
     <button class="nav-tab" onclick="showPage('tags',this)">Tag Shopee</button>
+    <button class="nav-tab" onclick="showPage('alert',this)">🔴 Alert Rugi</button>
+    <button class="nav-tab" onclick="showPage('hourly',this)">⏰ Jam Terbaik</button>
+    <button class="nav-tab" onclick="showPage('products',this)">📦 Top Produk</button>
   </div>
 </nav>
 
@@ -385,6 +427,80 @@ tfoot tr td{font-weight:700;background:#f9fafb;border-top:2px solid var(--border
   </div>
 </div>
 
+<!-- ALERT IKLAN RUGI -->
+<div id="page-alert" class="page">
+  <div class="section-header">
+    <div><div class="section-title">🔴 Alert Iklan Rugi Berturut-turut</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Deteksi tag/kampanye yang rugi selama N hari berturut-turut</div></div>
+  </div>
+  <div class="alert-controls">
+    <label>Minimal hari rugi berturut-turut:</label>
+    <input type="number" id="alert-days" value="3" min="1" max="30" onchange="renderAlertPage()">
+    <span style="font-size:12px;color:var(--text2)">hari</span>
+    <div class="date-presets" style="margin-left:8px">
+      <button class="date-preset" onclick="setAlertPreset(3,this)">3 Hari</button>
+      <button class="date-preset active" onclick="setAlertPreset(7,this)">7 Hari</button>
+      <button class="date-preset" onclick="setAlertPreset(14,this)">14 Hari</button>
+      <button class="date-preset" onclick="setAlertPreset(30,this)">30 Hari</button>
+    </div>
+    <span style="font-size:12px;color:var(--text2);margin-left:8px">Periode analisis:</span>
+    <input type="date" id="alert-from" onchange="renderAlertPage()">
+    <span style="color:var(--text2)">–</span>
+    <input type="date" id="alert-to" onchange="renderAlertPage()">
+  </div>
+  <div id="alert-body"><div class="no-alert"><div class="ico">📂</div>Upload data dan mapping terlebih dahulu.</div></div>
+</div>
+
+<!-- JAM TERBAIK -->
+<div id="page-hourly" class="page">
+  <div class="section-header">
+    <div><div class="section-title">⏰ Analisis Jam Terbaik</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Jam berapa klik dan order paling banyak terjadi — bantu atur jadwal iklan Meta</div></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="date" id="hourly-from" onchange="renderHourlyPage()">
+      <span style="color:var(--text2)">–</span>
+      <input type="date" id="hourly-to" onchange="renderHourlyPage()">
+    </div>
+  </div>
+  <div class="hour-summary" id="hourly-summary"></div>
+  <div class="chart-grid" style="margin-bottom:20px">
+    <div class="chart-card"><h3>Distribusi Klik Shopee per Jam</h3><div class="chart-wrap"><canvas id="chart-hourly-clicks"></canvas></div></div>
+    <div class="chart-card"><h3>Distribusi Order per Jam</h3><div class="chart-wrap"><canvas id="chart-hourly-orders"></canvas></div></div>
+  </div>
+  <div class="card">
+    <h3 style="font-size:13px;font-weight:600;margin-bottom:4px">Heatmap Klik per Jam × Hari</h3>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Hijau gelap = klik terbanyak. Merah = tidak ada klik (hari itu). Putih = tidak ada data.</p>
+    <div class="heatmap-wrap"><table class="heatmap" id="heatmap-table"></table></div>
+  </div>
+</div>
+
+<!-- TOP PRODUK -->
+<div id="page-products" class="page">
+  <div class="section-header">
+    <div><div class="section-title">📦 Top Produk per Tag</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Produk terlaris & komisi terbesar dari setiap tag Shopee</div></div>
+  </div>
+  <div class="prod-filter">
+    <select id="prod-tag" onchange="renderProductsPage()"><option value="">Semua Tag</option></select>
+    <select id="prod-sort" onchange="renderProductsPage()">
+      <option value="komisi">Urutkan: Komisi</option>
+      <option value="orders">Urutkan: Order</option>
+      <option value="gmv">Urutkan: Nilai Pembelian</option>
+    </select>
+    <input type="date" id="prod-from" onchange="renderProductsPage()">
+    <span style="color:var(--text2)">–</span>
+    <input type="date" id="prod-to" onchange="renderProductsPage()">
+    <input type="text" id="prod-search" placeholder="🔍 Cari nama produk..." oninput="renderProductsPage()" style="min-width:200px">
+  </div>
+  <div class="metric-grid" id="prod-metrics"></div>
+  <div class="card">
+    <div class="table-wrap">
+      <table><thead><tr>
+        <th>#</th><th>Nama Produk</th><th>Tag</th><th>Toko</th>
+        <th>Order</th><th>Qty Terjual</th><th>Nilai Pembelian</th>
+        <th>Komisi (Rp)</th><th>Komisi/Order</th><th>Kategori</th>
+      </tr></thead><tbody id="prod-table-body"></tbody></table>
+    </div>
+  </div>
+</div>
+
 <!-- TAG DETAIL MODAL -->
 <div class="modal-overlay hidden" id="tag-modal">
   <div class="modal">
@@ -485,6 +601,258 @@ function showPage(id,btn){
   else if(id==='dashboard')renderDashboard();
   else if(id==='detail')renderDetailPage();
   else if(id==='tags')renderTagsPage();
+  else if(id==='alert')renderAlertPage();
+  else if(id==='hourly')renderHourlyPage();
+  else if(id==='products')renderProductsPage();
+}
+
+// ============================================================
+// ALERT IKLAN RUGI
+// ============================================================
+let alertCharts={};
+function setAlertPreset(days, el){
+  document.querySelectorAll('#page-alert .date-preset').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const yd=new Date();yd.setDate(yd.getDate()-1);
+  const from=new Date(yd);from.setDate(from.getDate()-(days-1));
+  document.getElementById('alert-from').value=from.toISOString().slice(0,10);
+  document.getElementById('alert-to').value=yd.toISOString().slice(0,10);
+  renderAlertPage();
+}
+function renderAlertPage(){
+  const minDays=parseInt(document.getElementById('alert-days')?.value||3);
+  const from=document.getElementById('alert-from')?.value||null;
+  const to=document.getElementById('alert-to')?.value||null;
+  const body=document.getElementById('alert-body');
+  if(!rawMeta.length&&!rawOrders.length){
+    body.innerHTML='<div class="no-alert"><div class="ico">📂</div>Upload data dan mapping terlebih dahulu.</div>';return;
+  }
+  // Get all dates in range
+  const allDates=[...new Set([
+    ...rawMeta.map(r=>(r['date_start']||'').slice(0,10)),
+    ...rawOrders.map(r=>(r['Waktu Pemesanan']||'').slice(0,10))
+  ].filter(Boolean))].filter(d=>inRange(d,from,to)).sort();
+
+  // Build daily profit per tag
+  const tagDayProfit={};  // tag -> {date -> profit}
+  const tags=getUniqueTags();
+  tags.forEach(tag=>{
+    tagDayProfit[tag]={};
+    const camps=mapping[tag]||[];
+    allDates.forEach(dt=>{
+      let spend=0;
+      camps.forEach(c=>{rawMeta.filter(r=>r['campaign_name']===c&&(r['date_start']||'').slice(0,10)===dt).forEach(r=>spend+=parseFloat(r['spend']||0));});
+      const tc=getTotalCost(spend);
+      // unique orders komisi
+      const orderK={};
+      rawOrders.filter(r=>(r['Tag_link1']||'').trim()===tag&&(r['Waktu Pemesanan']||'').slice(0,10)===dt&&r['Status Pesanan']!=='Dibatalkan').forEach(r=>{
+        const oid=r['ID Pemesanan'];
+        if(!orderK[oid])orderK[oid]=0;
+        orderK[oid]+=parseFloat(r['Total Komisi per Produk(Rp)']||0);
+      });
+      const komisi=Object.values(orderK).reduce((s,v)=>s+v,0);
+      tagDayProfit[tag][dt]=komisi-tc;
+    });
+  });
+
+  // Detect consecutive loss streaks
+  const alerts=[];
+  tags.forEach(tag=>{
+    const days=allDates;
+    let streak=[];
+    let maxStreak=[];
+    days.forEach(dt=>{
+      const profit=tagDayProfit[tag][dt];
+      // only count days where there was spend (avoid days with 0 activity)
+      const hasActivity=(mapping[tag]||[]).some(c=>rawMeta.some(r=>r['campaign_name']===c&&(r['date_start']||'').slice(0,10)===dt&&parseFloat(r['spend']||0)>0));
+      if(hasActivity&&profit<0){streak.push(dt);}
+      else{if(streak.length>maxStreak.length)maxStreak=[...streak];streak=[];}
+    });
+    if(streak.length>maxStreak.length)maxStreak=[...streak];
+    // Current streak = streak at end
+    const currentStreak=streak;
+    if(currentStreak.length>=minDays){
+      const totalLoss=currentStreak.reduce((s,dt)=>s+tagDayProfit[tag][dt],0);
+      alerts.push({tag,streak:currentStreak,totalLoss,maxStreak,type:'current'});
+    } else if(maxStreak.length>=minDays&&maxStreak.length>currentStreak.length){
+      const totalLoss=maxStreak.reduce((s,dt)=>s+tagDayProfit[tag][dt],0);
+      alerts.push({tag,streak:maxStreak,totalLoss,maxStreak,type:'past'});
+    }
+  });
+
+  alerts.sort((a,b)=>a.totalLoss-b.totalLoss);
+
+  if(!alerts.length){
+    body.innerHTML=`<div class="no-alert"><div class="ico">✅</div><div style="font-size:15px;font-weight:600;color:var(--green);margin-bottom:6px">Tidak ada iklan yang rugi ${minDays}+ hari berturut-turut!</div><div>Semua tag performa baik dalam periode ini.</div></div>`;
+    return;
+  }
+
+  function fmtD(dt){const d=new Date(dt+'T00:00:00');return d.toLocaleDateString('id-ID',{day:'numeric',month:'short'});}
+
+  body.innerHTML=`<div style="font-size:13px;color:var(--text2);margin-bottom:14px">Ditemukan <strong style="color:var(--red)">${alerts.filter(a=>a.type==='current').length} tag aktif rugi</strong> dan <strong style="color:var(--yellow)">${alerts.filter(a=>a.type==='past').length} tag pernah rugi</strong> ≥${minDays} hari berturut-turut.</div>`+
+  alerts.map(a=>{
+    const isCurrent=a.type==='current';
+    const chips=a.streak.map(dt=>`<span class="alert-day-chip">${fmtD(dt)}</span>`).join('');
+    const profitPerDay=a.streak.map(dt=>`${fmtD(dt)}: -Rp${fmt(Math.abs(tagDayProfit[a.tag][dt]))}`).join(' · ');
+    return `<div class="alert-banner ${isCurrent?'loss':'warn'}">
+      <div class="alert-icon">${isCurrent?'🔴':'🟡'}</div>
+      <div style="flex:1">
+        <div class="alert-title">${esc(a.tag)} — ${isCurrent?'SEDANG RUGI':'PERNAH RUGI'} ${a.streak.length} HARI</div>
+        <div class="alert-sub">Total rugi: <strong>-Rp ${fmt(Math.abs(a.totalLoss))}</strong> · ${profitPerDay}</div>
+        <div class="alert-days">${chips}</div>
+        ${(mapping[a.tag]||[]).length?`<div style="font-size:11px;color:var(--text2);margin-top:5px">Kampanye: ${mapping[a.tag].join(', ')}</div>`:''}
+        ${isCurrent?`<div style="margin-top:8px"><span class="badge badge-loss">⚠️ Pertimbangkan pause kampanye ini</span></div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// JAM TERBAIK
+// ============================================================
+let chartHourlyClicks=null,chartHourlyOrders=null;
+function renderHourlyPage(){
+  const from=document.getElementById('hourly-from')?.value||null;
+  const to=document.getElementById('hourly-to')?.value||null;
+  if(!rawClicks.length&&!rawOrders.length){
+    document.getElementById('hourly-summary').innerHTML='<p style="color:var(--text2)">Upload data terlebih dahulu.</p>';return;
+  }
+  // Clicks per hour
+  const clicksByHour=new Array(24).fill(0);
+  rawClicks.forEach(r=>{
+    const dt=(r['Waktu Klik']||'').slice(0,10);
+    if(!inRange(dt,from,to))return;
+    const h=parseInt((r['Waktu Klik']||'').slice(11,13));
+    if(!isNaN(h))clicksByHour[h]++;
+  });
+  // Orders per hour
+  const ordersByHour=new Array(24).fill(0);
+  const orderIds=new Set();
+  rawOrders.forEach(r=>{
+    if(r['Status Pesanan']==='Dibatalkan')return;
+    const dt=(r['Waktu Pemesanan']||'').slice(0,10);
+    if(!inRange(dt,from,to))return;
+    const oid=r['ID Pemesanan'];
+    if(orderIds.has(oid))return;
+    orderIds.add(oid);
+    const h=parseInt((r['Waktu Pemesanan']||'').slice(11,13));
+    if(!isNaN(h))ordersByHour[h]++;
+  });
+
+  const maxClickH=clicksByHour.indexOf(Math.max(...clicksByHour));
+  const maxOrderH=ordersByHour.indexOf(Math.max(...ordersByHour));
+  const totalClicks=clicksByHour.reduce((s,v)=>s+v,0);
+  const totalOrders=ordersByHour.reduce((s,v)=>s+v,0);
+  // Best 3 hours for clicks
+  const top3Click=[...clicksByHour.map((v,h)=>({h,v}))].sort((a,b)=>b.v-a.v).slice(0,3);
+  const top3Order=[...ordersByHour.map((v,h)=>({h,v}))].sort((a,b)=>b.v-a.v).slice(0,3);
+
+  document.getElementById('hourly-summary').innerHTML=
+    `<div class="hour-card"><div class="hc-label">Jam Klik Terbanyak</div><div class="hc-val" style="color:var(--green)">${String(maxClickH).padStart(2,'0')}:00</div><div class="hc-sub">${fmt(clicksByHour[maxClickH])} klik</div></div>`+
+    `<div class="hour-card"><div class="hc-label">Jam Order Terbanyak</div><div class="hc-val" style="color:var(--accent)">${String(maxOrderH).padStart(2,'0')}:00</div><div class="hc-sub">${fmt(ordersByHour[maxOrderH])} order</div></div>`+
+    `<div class="hour-card"><div class="hc-label">Top 3 Jam Klik</div><div class="hc-val" style="font-size:14px;color:var(--green)">${top3Click.map(x=>String(x.h).padStart(2,'0')+':00').join(', ')}</div><div class="hc-sub">Jadwalkan iklan di jam ini</div></div>`+
+    `<div class="hour-card"><div class="hc-label">Top 3 Jam Order</div><div class="hc-val" style="font-size:14px;color:var(--accent)">${top3Order.map(x=>String(x.h).padStart(2,'0')+':00').join(', ')}</div><div class="hc-sub">Konversi tertinggi</div></div>`+
+    `<div class="hour-card"><div class="hc-label">Total Klik</div><div class="hc-val">${fmt(totalClicks)}</div><div class="hc-sub">dalam periode</div></div>`+
+    `<div class="hour-card"><div class="hc-label">Total Order</div><div class="hc-val">${fmt(totalOrders)}</div><div class="hc-sub">unique orders</div></div>`;
+
+  const labels=Array.from({length:24},(_,h)=>String(h).padStart(2,'0')+':00');
+  const clickColors=clicksByHour.map(v=>{const mx=Math.max(...clicksByHour);return v===0?'#e5e7eb':v>=mx*.8?'#15803d':v>=mx*.5?'#22c55e':v>=mx*.25?'#86efac':'#bbf7d0';});
+  const orderColors=ordersByHour.map(v=>{const mx=Math.max(...ordersByHour);return v===0?'#e5e7eb':v>=mx*.8?'#4f46e5':v>=mx*.5?'#6366f1':v>=mx*.25?'#a5b4fc':'#c7d2fe';});
+
+  if(chartHourlyClicks)chartHourlyClicks.destroy();
+  chartHourlyClicks=new Chart(document.getElementById('chart-hourly-clicks').getContext('2d'),{type:'bar',data:{labels,datasets:[{label:'Klik',data:clicksByHour,backgroundColor:clickColors,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}}},x:{ticks:{font:{size:9},maxRotation:45}}}}});
+  if(chartHourlyOrders)chartHourlyOrders.destroy();
+  chartHourlyOrders=new Chart(document.getElementById('chart-hourly-orders').getContext('2d'),{type:'bar',data:{labels,datasets:[{label:'Order',data:ordersByHour,backgroundColor:orderColors,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}}},x:{ticks:{font:{size:9},maxRotation:45}}}}});
+
+  // Heatmap: rows=days of week, cols=hours
+  const dayNames=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+  const heatData=Array.from({length:7},()=>new Array(24).fill(0));
+  rawClicks.forEach(r=>{
+    const dt=(r['Waktu Klik']||'').slice(0,10);if(!inRange(dt,from,to))return;
+    const d=new Date(dt+'T00:00:00');
+    const h=parseInt((r['Waktu Klik']||'').slice(11,13));
+    if(!isNaN(h))heatData[d.getDay()][h]++;
+  });
+  const allVals=heatData.flat().filter(v=>v>0);
+  const maxVal=allVals.length?Math.max(...allVals):1;
+  const p20=maxVal*.2,p50=maxVal*.5,p75=maxVal*.75;
+  function hmCls(v){if(v===0)return'hm-0';if(v<p20)return'hm-1';if(v<p50)return'hm-2';if(v<p75)return'hm-3';return'hm-4';}
+  const hdrCols=Array.from({length:24},(_,h)=>`<th>${String(h).padStart(2,'0')}</th>`).join('');
+  const bodyRows=dayNames.map((day,di)=>{
+    const cells=heatData[di].map(v=>`<td class="${hmCls(v)}" title="${v} klik">${v||''}</td>`).join('');
+    return`<tr><th style="text-align:right;padding-right:8px;color:var(--text2)">${day}</th>${cells}</tr>`;
+  }).join('');
+  document.getElementById('heatmap-table').innerHTML=`<thead><tr><th></th>${hdrCols}</tr></thead><tbody>${bodyRows}</tbody>`;
+}
+
+// ============================================================
+// TOP PRODUK PER TAG
+// ============================================================
+function renderProductsPage(){
+  const selTag=document.getElementById('prod-tag')?.value||'';
+  const sortBy=document.getElementById('prod-sort')?.value||'komisi';
+  const from=document.getElementById('prod-from')?.value||null;
+  const to=document.getElementById('prod-to')?.value||null;
+  const search=(document.getElementById('prod-search')?.value||'').toLowerCase();
+
+  // Populate tag filter on first run
+  const tagSel=document.getElementById('prod-tag');
+  if(tagSel&&tagSel.options.length<=1){
+    getUniqueTags().forEach(t=>{const o=new Option(t,t);tagSel.appendChild(o);});
+  }
+  if(!rawOrders.length){
+    document.getElementById('prod-table-body').innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:20px">Upload data Shopee Komisi terlebih dahulu.</td></tr>';return;
+  }
+
+  // Aggregate per product (Nama Barang + ID Barang) per tag
+  const prodMap={};  // key = tag+'||'+idBarang
+  rawOrders.forEach(r=>{
+    if(r['Status Pesanan']==='Dibatalkan')return;
+    const dt=(r['Waktu Pemesanan']||'').slice(0,10);
+    if(!inRange(dt,from,to))return;
+    const tag=(r['Tag_link1']||'').trim();if(!tag||tag==='Ada')return;
+    if(selTag&&tag!==selTag)return;
+    const nama=(r['Nama Barange']||r['Nama Barang']||'').trim();
+    if(!nama)return;
+    if(search&&!nama.toLowerCase().includes(search)&&!tag.toLowerCase().includes(search))return;
+    const idB=r['ID Barang']||nama;
+    const key=tag+'||'+idB;
+    if(!prodMap[key]){prodMap[key]={tag,nama,idBarang:idB,toko:r['Nama Toko']||'-',kategori:r['L2 Kategori Global']||r['L1 Kategori Global']||'-',orders:new Set(),qty:0,gmv:0,komisi:0};}
+    prodMap[key].orders.add(r['ID Pemesanan']);
+    prodMap[key].qty+=parseInt(r['Jumlah']||0);
+    prodMap[key].gmv+=parseFloat(r['Nilai Pembelian(Rp)']||0);
+    prodMap[key].komisi+=parseFloat(r['Total Komisi per Produk(Rp)']||0);
+  });
+
+  let rows=Object.values(prodMap).map(p=>({...p,orderCount:p.orders.size}));
+  if(sortBy==='orders')rows.sort((a,b)=>b.orderCount-a.orderCount);
+  else if(sortBy==='gmv')rows.sort((a,b)=>b.gmv-a.gmv);
+  else rows.sort((a,b)=>b.komisi-a.komisi);
+
+  const totKomisi=rows.reduce((s,r)=>s+r.komisi,0);
+  const totOrders=rows.reduce((s,r)=>s+r.orderCount,0);
+  const totGmv=rows.reduce((s,r)=>s+r.gmv,0);
+  const totQty=rows.reduce((s,r)=>s+r.qty,0);
+  document.getElementById('prod-metrics').innerHTML=
+    M('Total Produk Unik',rows.length,'','blue')+
+    M('Total Order',fmt(totOrders),'unique orders','')+
+    M('Total Qty Terjual',fmt(totQty),'item','purple')+
+    M('Total GMV','Rp '+fmt(totGmv),'nilai pembelian','')+
+    M('Total Komisi','Rp '+fmt(totKomisi),'','green');
+
+  function rankCls(i){if(i===0)return'gold';if(i===1)return'silver';if(i===2)return'bronze';return'';}
+  document.getElementById('prod-table-body').innerHTML=rows.slice(0,100).map((r,i)=>`<tr>
+    <td><span class="prod-rank ${rankCls(i)}">${i+1}</span></td>
+    <td style="max-width:220px;font-weight:500">${esc(r.nama)}</td>
+    <td><span class="tag-badge" style="font-size:10px">${esc(r.tag)}</span></td>
+    <td style="font-size:11px;color:var(--text2)">${esc(r.toko)}</td>
+    <td style="font-weight:600">${fmt(r.orderCount)}</td>
+    <td>${fmt(r.qty)}</td>
+    <td>Rp ${fmt(r.gmv)}</td>
+    <td style="color:var(--green);font-weight:600">Rp ${fmt(r.komisi)}</td>
+    <td style="color:var(--text2)">${r.orderCount>0?'Rp '+fmt(r.komisi/r.orderCount):'-'}</td>
+    <td style="font-size:11px;color:var(--text2)">${esc(r.kategori)}</td>
+  </tr>`).join('')||'<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:20px">Tidak ada data</td></tr>';
 }
 
 // ============================================================
