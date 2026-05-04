@@ -337,6 +337,32 @@ padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14p
 .prod-rank.gold{background:#f59e0b;}
 .prod-rank.silver{background:#9ca3af;}
 .prod-rank.bronze{background:#b45309;}
+
+/* COMPACT DASHBOARD TABLE - biar tidak scroll horizontal */
+#page-dashboard .table-wrap table {
+  font-size:11px;
+}
+#page-dashboard .table-wrap table th {
+  padding:6px 7px;
+  font-size:9px;
+  letter-spacing:.4px;
+  white-space:nowrap;
+}
+#page-dashboard .table-wrap table td {
+  padding:7px 7px;
+  white-space:nowrap;
+}
+#page-dashboard .table-wrap table td:nth-child(2) {
+  white-space:normal;
+  max-width:130px;
+  line-height:1.25;
+  font-size:10.5px;
+}
+#page-dashboard .table-wrap table td:nth-child(1) .tag-badge {
+  padding:2px 7px;
+  font-size:10px;
+}
+
 </style>
 </head>
 <body>
@@ -502,7 +528,7 @@ padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14p
     </div>
     <div class="table-wrap">
       <table><thead><tr>
-        <th>Tag Shopee</th><th>Kampanye Meta</th><th>Spend (Rp)</th><th>PPN</th><th>Total Biaya</th>
+        <th>Tag Shopee</th><th>Kampanye Meta</th><th>Spend (Rp)</th><th>Total Biaya (+PPN)</th>
         <th>CPR (Rp)</th><th>Klik Meta</th><th>Klik Shopee</th><th>CTR%</th>
         <th>Order</th><th>CVR</th><th>Komisi (Rp)</th><th>ROAS</th><th>Profit (Rp)</th><th>ROI</th><th>Status</th>
       </tr></thead><tbody id="dash-table-body"></tbody></table>
@@ -1199,9 +1225,9 @@ function renderMappingSummary(){
   const tags=getUniqueTags();
   const mapped=tags.filter(t=>mapping[t]?.length);
   const unmapped=tags.filter(t=>!mapping[t]?.length);
-  let html=`<div style="font-size:12px;color:var(--text2);margin-bottom:10px">${mapped.length}/${tags.length} tag sudah di-mapping</div>`;
-  html+=mapped.map(t=>`<div style="margin-bottom:7px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;font-size:12px;display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap"><span class="tag-badge" style="flex-shrink:0">${esc(t)}</span><span style="color:#e2e8f0;font-weight:500;line-height:1.6">→ ${esc(mapping[t].join(' / '))}</span></div>`).join('');
-  if(unmapped.length)html+=`<div style="font-size:12px;color:var(--text2);margin-top:12px;line-height:1.9">⚠️ Belum mapping:<br>${unmapped.map(t=>`<span class="tag-badge" style="margin:2px;opacity:.6">${esc(t)}</span>`).join('')}</div>`;
+  let html=`<div style="font-size:12px;color:var(--text);font-weight:600;margin-bottom:10px">${mapped.length}/${tags.length} tag sudah di-mapping</div>`;
+  html+=mapped.map(t=>`<div style="margin-bottom:7px;padding:9px 11px;background:var(--card2);border:1px solid var(--border);border-radius:10px;font-size:12px;line-height:1.5"><span class="tag-badge" style="margin-right:8px;background:rgba(124,58,237,.35);color:#f5f3ff;border-color:rgba(167,139,250,.5)">${esc(t)}</span><span style="color:var(--text);font-weight:500">→ ${esc(mapping[t].join(' / '))}</span></div>`).join('');
+  if(unmapped.length)html+=`<div style="font-size:12px;color:var(--text3);margin-top:10px;line-height:1.9">⚠️ Belum mapping:<br>${unmapped.map(t=>`<span class="tag-badge" style="margin:2px">${esc(t)}</span>`).join('')}</div>`;
   document.getElementById('mapping-summary').innerHTML=html;
 }
 
@@ -1514,8 +1540,7 @@ function renderDashTable(ts){
       <td><span class="tag-badge tag-badge-btn" onclick="openTagModal('${enc(r.tag)}')" title="Klik untuk detail">${esc(r.tag)} ↗</span></td>
       <td style="font-size:11px;color:var(--text2);max-width:180px">${r.campaigns.length?r.campaigns.join('<br>'):'<em style="color:var(--text3)">Belum mapping</em>'}</td>
       <td>${fmt(r.spend)}</td>
-      <td style="color:var(--yellow)">${ppnRate>0?fmt(r.ppnAmount):'-'}</td>
-      <td style="font-weight:600">${fmt(r.totalCost)}</td>
+      <td style=\"font-weight:600\">${fmt(r.totalCost)}</td>
       <td style="color:var(--text2)">${r.cpr!==null?'Rp '+fmt(r.cpr):'-'}</td>
       <td>${fmt(r.metaClicks)}</td><td>${fmt(r.shopeeClicks)}</td><td>${ctrB(r.clickThru)}</td>
       <td>${fmt(r.orders)}</td><td>${cvrB(r.cvr)}</td>
