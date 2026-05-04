@@ -363,6 +363,20 @@ padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14p
   font-size:10px;
 }
 
+
+/* COMPACT MODAL TABLE */
+#tag-modal .modal-table-wrap table {
+  font-size:11px;
+}
+#tag-modal .modal-table-wrap table th {
+  padding:5px 6px;
+  font-size:9px;
+}
+#tag-modal .modal-table-wrap table td {
+  padding:6px 6px;
+  white-space:nowrap;
+}
+
 </style>
 </head>
 <body>
@@ -697,7 +711,7 @@ padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14p
       <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Rincian Harian</div>
       <div class="modal-table-wrap">
         <table><thead><tr>
-          <th>Tanggal</th><th>Spend</th><th>PPN</th><th>Total Biaya</th><th>CPR</th>
+          <th>Tanggal</th><th>Spend</th><th>Total Biaya (+PPN)</th><th>CPR</th>
           <th>Klik Meta</th><th>Klik Shopee</th><th>CTR%</th>
           <th>Order</th><th>CVR</th><th>Komisi</th><th>ROAS</th><th>Profit</th><th>ROI</th><th>Status</th>
         </tr></thead><tbody id="modal-table-body"></tbody></table>
@@ -1598,8 +1612,8 @@ function renderDetailPage(){
       <td>${r.dt}</td>
       <td style="font-size:11px;color:var(--text2);max-width:160px">${r.campaigns.join(', ')}</td>
       <td><span class="tag-badge tag-badge-btn" onclick="openTagModal('${enc(r.tag)}')">${esc(r.tag)} ↗</span></td>
-      <td>${fmt(r.spend)}</td><td style="color:var(--yellow)">${ppnRate>0?fmt(r.ppnA):'-'}</td>
-      <td style="font-weight:600">${fmt(r.tc)}</td>
+      <td>${fmt(r.spend)}</td>
+      <td style=\"font-weight:600\">${fmt(r.tc)}</td>
       <td>${fmt(r.mc)}</td><td>${fmt(r.sc)}</td><td>${ctrB(r.ctr)}</td>
       <td>${fmt(r.orders)}</td><td>${cvrB(r.cvr)}</td>
       <td>${fmt(r.komisi)}</td>${roasCell(r.roas)}
@@ -1722,8 +1736,8 @@ function renderModal(){
     const bg=ip?'background:rgba(16,185,129,.07)':il?'background:rgba(239,68,68,.07)':'';
     return`<tr style="${bg}">
       <td style="white-space:nowrap;font-weight:500">${r.dt}</td>
-      <td>${fmt(r.spend)}</td><td style="color:var(--yellow)">${ppnRate>0?fmt(r.ppnA):'-'}</td>
-      <td style="font-weight:600">${fmt(r.tc)}</td>
+      <td>${fmt(r.spend)}</td>
+      <td style=\"font-weight:600\">${fmt(r.tc)}</td>
       <td style="color:var(--text2)">${r.cpr!==null?'Rp '+fmt(r.cpr):'-'}</td>
       <td>${fmt(r.mc)}</td><td>${fmt(r.sc)}</td><td>${ctrB(r.ctr)}</td>
       <td>${fmt(r.orders)}</td><td>${cvrB(r.cvr)}</td>
