@@ -537,13 +537,14 @@ padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14p
         <option value="roi">Urutkan: ROI</option>
         <option value="roas">Urutkan: ROAS</option>
         <option value="cvr">Urutkan: CVR</option>
-        <option value="cpr">Urutkan: CPR</option>
+        <option value="cpr">Urutkan: CPR Meta</option>
+        <option value="cprShopee">Urutkan: CPR Shopee</option>
       </select>
     </div>
     <div class="table-wrap">
       <table><thead><tr>
         <th>Tag Shopee</th><th>Kampanye Meta</th><th>Spend (Rp)</th><th>Total Biaya (+PPN)</th>
-        <th>CPR (Rp)</th><th>Klik Meta</th><th>Klik Shopee</th><th>CTR%</th>
+        <th>CPR Meta</th><th>CPR Shopee</th><th>Klik Meta</th><th>Klik Shopee</th><th>CTR%</th>
         <th>Order</th><th>CVR</th><th>Komisi (Rp)</th><th>ROAS</th><th>Profit (Rp)</th><th>ROI</th><th>Status</th>
       </tr></thead><tbody id="dash-table-body"></tbody></table>
     </div>
@@ -558,6 +559,11 @@ padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14p
       <select id="detail-campaign" onchange="renderDetailPage()" style="padding:5px 9px;border:1px solid var(--border);border-radius:8px;font-size:13px;max-width:280px">
         <option value="">Semua Kampanye</option>
       </select>
+      <div class="date-presets">
+        <button class="date-preset" onclick="setDetailPreset('yesterday',this)">Kemarin</button>
+        <button class="date-preset" onclick="setDetailPreset('3d',this)">3 Hari</button>
+        <button class="date-preset active" onclick="setDetailPreset('7d',this)">7 Hari</button>
+      </div>
       <input type="date" id="detail-from" onchange="renderDetailPage()">
       <span style="color:var(--text2)">–</span>
       <input type="date" id="detail-to" onchange="renderDetailPage()">
@@ -569,7 +575,8 @@ padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14p
     <div class="table-wrap">
       <table><thead><tr>
         <th>Tanggal</th><th>Kampanye</th><th>Tag</th>
-        <th>Spend</th><th>PPN</th><th>Total Biaya</th>
+        <th>Spend</th><th>Total Biaya</th>
+        <th>CPR Meta</th><th>CPR Shopee</th>
         <th>Klik Meta</th><th>Klik Shopee</th><th>CTR%</th>
         <th>Order</th><th>CVR</th><th>Komisi</th><th>ROAS</th><th>Profit</th><th>ROI</th><th>Status</th>
       </tr></thead><tbody id="detail-table-body"></tbody></table>
@@ -581,7 +588,12 @@ padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14p
 <div id="page-tags" class="page">
   <div class="section-header">
     <div class="section-title">Analisis Tag Shopee</div>
-    <div style="display:flex;gap:8px;align-items:center">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <div class="date-presets">
+        <button class="date-preset" onclick="setTagsPreset('yesterday',this)">Kemarin</button>
+        <button class="date-preset" onclick="setTagsPreset('3d',this)">3 Hari</button>
+        <button class="date-preset active" onclick="setTagsPreset('7d',this)">7 Hari</button>
+      </div>
       <input type="date" id="tags-from" onchange="renderTagsPage()">
       <span style="color:var(--text2)">–</span>
       <input type="date" id="tags-to" onchange="renderTagsPage()">
@@ -597,7 +609,7 @@ padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14p
     <div class="table-wrap">
       <table><thead><tr>
         <th>Tag</th><th>Klik Meta</th><th>Klik Shopee</th><th>CTR%</th>
-        <th>Order</th><th>CVR</th><th>Komisi (Rp)</th><th>Total Biaya (Rp)</th><th>Profit (Rp)</th><th>ROI</th><th>Status</th>
+        <th>CPR Shopee</th><th>Order</th><th>CVR</th><th>Komisi (Rp)</th><th>Total Biaya (Rp)</th><th>Profit (Rp)</th><th>ROI</th><th>Status</th>
       </tr></thead><tbody id="tags-table-body"></tbody></table>
     </div>
   </div>
@@ -711,7 +723,7 @@ padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14p
       <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Rincian Harian</div>
       <div class="modal-table-wrap">
         <table><thead><tr>
-          <th>Tanggal</th><th>Spend</th><th>Total Biaya (+PPN)</th><th>CPR</th>
+          <th>Tanggal</th><th>Spend</th><th>Total Biaya (+PPN)</th><th>CPR Meta</th><th>CPR Shopee</th>
           <th>Klik Meta</th><th>Klik Shopee</th><th>CTR%</th>
           <th>Order</th><th>CVR</th><th>Komisi</th><th>ROAS</th><th>Profit</th><th>ROI</th><th>Status</th>
         </tr></thead><tbody id="modal-table-body"></tbody></table>
@@ -751,6 +763,7 @@ function statusB(profit,cost){if(!cost)return'<span class="badge badge-pending">
 function cvrB(v){if(v===null||v===undefined)return'<span style="color:var(--text3)">-</span>';const c=v>=5?'cvr-high':v>=2?'cvr-mid':'cvr-low';return`<span class="${c}">${v.toFixed(1)}%</span>`;}
 function ctrB(v){if(v===null||v===undefined)return'<span style="color:var(--text3)">-</span>';const c=v>=60?'cvr-high':v>=30?'cvr-mid':'cvr-low';return`<span class="${c}">${v.toFixed(1)}%</span>`;}
 function roasB(v){if(v===null||v===undefined)return'-';const c=v>=1.5?'cvr-high':v>=1?'cvr-mid':'cvr-low';return`<span class="${c}" style="font-weight:600">${v.toFixed(2)}x</span>`;}
+function cprShopeeB(v){if(v===null||v===undefined)return'<span style="color:var(--text3)">-</span>';return`<span style="color:#f0abfc;font-weight:600">Rp ${fmt(Math.round(v))}</span>`;}
 function inRange(dt,from,to){const d=String(dt).slice(0,10);if(from&&d<from)return false;if(to&&d>to)return false;return true;}
 
 // ============================================================
@@ -1272,7 +1285,7 @@ function computeCampaignMeta(from,to){
   });
   return{spend,clicks,results};
 }
-function newStat(tag){return{tag,shopeeClicks:0,orders:0,komisi:0,komisiKotor:0,spend:0,metaClicks:0,metaResults:0,ppnAmount:0,totalCost:0,profit:0,roi:null,roas:null,cpr:null,cvr:null,clickThru:null,campaigns:[],_orderIds:new Set()};}
+function newStat(tag){return{tag,shopeeClicks:0,orders:0,komisi:0,komisiKotor:0,spend:0,metaClicks:0,metaResults:0,ppnAmount:0,totalCost:0,profit:0,roi:null,roas:null,cpr:null,cprShopee:null,cvr:null,clickThru:null,campaigns:[],_orderIds:new Set()};}
 function computeTagStats(from,to){
   const ts={};
   rawClicks.forEach(r=>{
@@ -1314,6 +1327,7 @@ function computeTagStats(from,to){
     s.roi=s.totalCost>0?s.profit/s.totalCost*100:null;
     s.roas=s.totalCost>0?s.komisi/s.totalCost:null;
     s.cpr=s.metaResults>0?s.spend/s.metaResults:null;
+    s.cprShopee=s.shopeeClicks>0?s.spend/s.shopeeClicks:null;
     s.cvr=s.shopeeClicks>0?s.orders/s.shopeeClicks*100:null;
     s.clickThru=s.metaClicks>0?s.shopeeClicks/s.metaClicks*100:null;
     s.campaigns=camps;
@@ -1544,7 +1558,9 @@ function renderDashTable(ts){
   const rows=Object.values(ts).sort((a,b)=>{
     if(by==='spend')return b.spend-a.spend;if(by==='komisi')return b.komisi-a.komisi;
     if(by==='roi')return(b.roi||0)-(a.roi||0);if(by==='cvr')return(b.cvr||0)-(a.cvr||0);
-    if(by==='roas')return(b.roas||0)-(a.roas||0);if(by==='cpr')return(a.cpr||Infinity)-(b.cpr||Infinity);
+    if(by==='roas')return(b.roas||0)-(a.roas||0);
+    if(by==='cpr')return(a.cpr||Infinity)-(b.cpr||Infinity);
+    if(by==='cprShopee')return(a.cprShopee||Infinity)-(b.cprShopee||Infinity);
     return b.profit-a.profit;
   });
   document.getElementById('dash-table-body').innerHTML=rows.map(r=>{
@@ -1554,8 +1570,9 @@ function renderDashTable(ts){
       <td><span class="tag-badge tag-badge-btn" onclick="openTagModal('${enc(r.tag)}')" title="Klik untuk detail">${esc(r.tag)} ↗</span></td>
       <td style="font-size:11px;color:var(--text2);max-width:180px">${r.campaigns.length?r.campaigns.join('<br>'):'<em style="color:var(--text3)">Belum mapping</em>'}</td>
       <td>${fmt(r.spend)}</td>
-      <td style=\"font-weight:600\">${fmt(r.totalCost)}</td>
+      <td style="font-weight:600">${fmt(r.totalCost)}</td>
       <td style="color:var(--text2)">${r.cpr!==null?'Rp '+fmt(r.cpr):'-'}</td>
+      <td>${cprShopeeB(r.cprShopee)}</td>
       <td>${fmt(r.metaClicks)}</td><td>${fmt(r.shopeeClicks)}</td><td>${ctrB(r.clickThru)}</td>
       <td>${fmt(r.orders)}</td><td>${cvrB(r.cvr)}</td>
       <td>${fmt(r.komisi)}</td>
@@ -1571,6 +1588,24 @@ function roasCell(v){return`<td>${roasB(v)}</td>`;}
 // ============================================================
 // DETAIL
 // ============================================================
+function setDetailPreset(p,el){
+  document.querySelectorAll('#page-detail .date-preset').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const yd=new Date();yd.setDate(yd.getDate()-1);const ydStr=yd.toISOString().slice(0,10);
+  if(p==='yesterday'){document.getElementById('detail-from').value=ydStr;document.getElementById('detail-to').value=ydStr;}
+  else if(p==='3d'){const d=new Date(yd);d.setDate(d.getDate()-2);document.getElementById('detail-from').value=d.toISOString().slice(0,10);document.getElementById('detail-to').value=ydStr;}
+  else if(p==='7d'){const d=new Date(yd);d.setDate(d.getDate()-6);document.getElementById('detail-from').value=d.toISOString().slice(0,10);document.getElementById('detail-to').value=ydStr;}
+  renderDetailPage();
+}
+function setTagsPreset(p,el){
+  document.querySelectorAll('#page-tags .date-preset').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const yd=new Date();yd.setDate(yd.getDate()-1);const ydStr=yd.toISOString().slice(0,10);
+  if(p==='yesterday'){document.getElementById('tags-from').value=ydStr;document.getElementById('tags-to').value=ydStr;}
+  else if(p==='3d'){const d=new Date(yd);d.setDate(d.getDate()-2);document.getElementById('tags-from').value=d.toISOString().slice(0,10);document.getElementById('tags-to').value=ydStr;}
+  else if(p==='7d'){const d=new Date(yd);d.setDate(d.getDate()-6);document.getElementById('tags-from').value=d.toISOString().slice(0,10);document.getElementById('tags-to').value=ydStr;}
+  renderTagsPage();
+}
 function renderDetailPage(){
   const camps=getUniqueCampaigns();
   const sel=document.getElementById('detail-campaign');
@@ -1593,17 +1628,19 @@ function renderDetailPage(){
       rawClicks.filter(r=>extractBaseTag(r['Tag_link']||'')===tag&&(r['Waktu Klik']||'').slice(0,10)===dt).forEach(()=>sc++);
       if(!spend&&!komisi&&!sc)return;
       const ppnA=getPpnAmount(spend),tc=getTotalCost(spend),profit=komisi-tc;
-      rows.push({dt,tag,campaigns:fc,spend,ppnA,tc,mc,sc,orders,komisi,profit,roas:tc>0?komisi/tc:null,roi:tc>0?profit/tc*100:null,cvr:sc>0?orders/sc*100:null,ctr:mc>0?sc/mc*100:null});
+      const cprShopee=sc>0?spend/sc:null;
+      rows.push({dt,tag,campaigns:fc,spend,ppnA,tc,mc,sc,orders,komisi,profit,cprShopee,roas:tc>0?komisi/tc:null,roi:tc>0?profit/tc*100:null,cvr:sc>0?orders/sc*100:null,ctr:mc>0?sc/mc*100:null});
     });
   });
   const tS=rows.reduce((s,r)=>s+r.spend,0),tPPN=rows.reduce((s,r)=>s+r.ppnA,0),tC=rows.reduce((s,r)=>s+r.tc,0);
   const tK=rows.reduce((s,r)=>s+r.komisi,0),tP=tK-tC,tO=rows.reduce((s,r)=>s+r.orders,0);
   const tM=rows.reduce((s,r)=>s+r.mc,0),tSh=rows.reduce((s,r)=>s+r.sc,0);
+  const tCprShopee=tSh>0?tS/tSh:null;
   document.getElementById('detail-metrics').innerHTML=
-    M('Total Spend','Rp '+fmt(tS),'','blue')+M('PPN','Rp '+fmt(tPPN),ppnRate+'%','yellow')+
-    M('Total Biaya','Rp '+fmt(tC),'incl PPN','red')+M('Klik Meta',fmt(tM),'','')+
-    M('Klik Shopee',fmt(tSh),'CTR: '+(tM>0?(tSh/tM*100).toFixed(1):'-')+'%','')+
-    M('CVR',(tSh>0?(tO/tSh*100).toFixed(1):'-')+'%',fmt(tO)+' order','purple')+
+    M('Total Spend','Rp '+fmt(tS),'','blue')+M('Total Biaya','Rp '+fmt(tC),'incl PPN','red')+
+    M('Klik Meta',fmt(tM),'','')+M('Klik Shopee',fmt(tSh),'CTR: '+(tM>0?(tSh/tM*100).toFixed(1):'-')+'%','')+
+    M('CPR Shopee',tCprShopee?'Rp '+fmt(tCprShopee):'-','Spend ÷ Klik Shopee','purple')+
+    M('CVR',(tSh>0?(tO/tSh*100).toFixed(1):'-')+'%',fmt(tO)+' order','')+
     M('Komisi','Rp '+fmt(tK),'','')+M('Net Profit','Rp '+fmt(tP),tC>0?(tP/tC*100).toFixed(1)+'% ROI':'',tP>=0?'green':'red');
   document.getElementById('detail-table-body').innerHTML=rows.map(r=>{
     const ip=r.tc>0&&r.profit>r.tc*.05,il=r.tc>0&&r.profit<-r.tc*.05;
@@ -1613,7 +1650,9 @@ function renderDetailPage(){
       <td style="font-size:11px;color:var(--text2);max-width:160px">${r.campaigns.join(', ')}</td>
       <td><span class="tag-badge tag-badge-btn" onclick="openTagModal('${enc(r.tag)}')">${esc(r.tag)} ↗</span></td>
       <td>${fmt(r.spend)}</td>
-      <td style=\"font-weight:600\">${fmt(r.tc)}</td>
+      <td style="font-weight:600">${fmt(r.tc)}</td>
+      <td style="color:var(--text2)">-</td>
+      <td>${cprShopeeB(r.cprShopee)}</td>
       <td>${fmt(r.mc)}</td><td>${fmt(r.sc)}</td><td>${ctrB(r.ctr)}</td>
       <td>${fmt(r.orders)}</td><td>${cvrB(r.cvr)}</td>
       <td>${fmt(r.komisi)}</td>${roasCell(r.roas)}
@@ -1634,10 +1673,13 @@ function renderTagsPage(){
   const rows=Object.values(ts).sort((a,b)=>b.komisi-a.komisi);
   const tK=rows.reduce((s,r)=>s+r.komisi,0),tCl=rows.reduce((s,r)=>s+r.shopeeClicks,0);
   const tO=rows.reduce((s,r)=>s+r.orders,0),tC=rows.reduce((s,r)=>s+r.totalCost,0),tM=rows.reduce((s,r)=>s+r.metaClicks,0);
+  const tSpend=rows.reduce((s,r)=>s+r.spend,0);
+  const tCprShopee=tCl>0?tSpend/tCl:null;
   document.getElementById('tags-metrics').innerHTML=
     M('Tag Aktif',rows.length,'unique tags','')+M('Klik Meta',fmt(tM),'','blue')+
     M('Klik Shopee',fmt(tCl),'CTR: '+(tM>0?(tCl/tM*100).toFixed(1):'-')+'%','')+
-    M('CVR Overall',(tCl>0?(tO/tCl*100).toFixed(1):'-')+'%',fmt(tO)+' order','purple')+
+    M('CPR Shopee',tCprShopee?'Rp '+fmt(tCprShopee):'-','Spend ÷ Klik Shopee','purple')+
+    M('CVR Overall',(tCl>0?(tO/tCl*100).toFixed(1):'-')+'%',fmt(tO)+' order','')+
     M('Total Komisi','Rp '+fmt(tK),'','green')+M('Total Biaya','Rp '+fmt(tC),'incl PPN '+ppnRate+'%','red');
   const top10=rows.slice(0,10);
   if(chartTagKomisi)chartTagKomisi.destroy();
@@ -1648,6 +1690,7 @@ function renderTagsPage(){
   document.getElementById('tags-table-body').innerHTML=rows.map(r=>`<tr>
     <td><span class="tag-badge tag-badge-btn" onclick="openTagModal('${enc(r.tag)}')">${esc(r.tag)} ↗</span></td>
     <td>${fmt(r.metaClicks)}</td><td>${fmt(r.shopeeClicks)}</td><td>${ctrB(r.clickThru)}</td>
+    <td>${cprShopeeB(r.cprShopee)}</td>
     <td>${fmt(r.orders)}</td><td>${cvrB(r.cvr)}</td><td>${fmt(r.komisi)}</td>
     <td>${r.totalCost>0?`${fmt(r.spend)} <span style="color:var(--yellow);font-size:10px">+PPN ${fmt(r.ppnAmount)}</span>`:'<span style="color:var(--text3)">Belum mapping</span>'}</td>
     <td style="font-weight:700;color:${r.profit>=0?'var(--green)':'var(--red)'}">${r.totalCost>0?(r.profit>=0?'+':'')+fmt(r.profit):'<span style="color:var(--text3)">-</span>'}</td>
@@ -1707,22 +1750,25 @@ function renderModal(){
     rawClicks.filter(r=>extractBaseTag(r['Tag_link']||'')===tag&&(r['Waktu Klik']||'').slice(0,10)===dt).forEach(()=>sc++);
     if(!spend&&!komisi&&!sc)return;
     const ppnA=getPpnAmount(spend),tc=getTotalCost(spend),profit=komisi-tc;
-    rows.push({dt,spend,ppnA,tc,mc,sc,orders,komisi,profit,results,cpr:results>0?spend/results:null,roas:tc>0?komisi/tc:null,roi:tc>0?profit/tc*100:null,cvr:sc>0?orders/sc*100:null,ctr:mc>0?sc/mc*100:null});
+    const cprShopeeVal=sc>0?spend/sc:null;
+    rows.push({dt,spend,ppnA,tc,mc,sc,orders,komisi,profit,results,cprShopee:cprShopeeVal,cpr:results>0?spend/results:null,roas:tc>0?komisi/tc:null,roi:tc>0?profit/tc*100:null,cvr:sc>0?orders/sc*100:null,ctr:mc>0?sc/mc*100:null});
   });
   const tS=rows.reduce((s,r)=>s+r.spend,0),tC=rows.reduce((s,r)=>s+r.tc,0);
   const tK=rows.reduce((s,r)=>s+r.komisi,0),tP=tK-tC,tO=rows.reduce((s,r)=>s+r.orders,0);
   const tSh=rows.reduce((s,r)=>s+r.sc,0),tM=rows.reduce((s,r)=>s+r.mc,0);
   const tR=rows.reduce((s,r)=>s+r.results,0),tCPR=tR>0?tS/tR:null;
+  const tCprShopee=tSh>0?tS/tSh:null;
   const roas=tC>0?tK/tC:null;
   document.getElementById('modal-metrics').innerHTML=
     M('Spend','Rp '+fmt(tS),'sebelum PPN','blue')+
     M('Total Biaya','Rp '+fmt(tC),'incl PPN '+ppnRate+'%','red')+
-    M('CPR','Rp '+fmt(tCPR||0),tR>0?fmt(tR)+' results':'','yellow')+
+    M('CPR Meta',tCPR?'Rp '+fmt(tCPR):'-',tR>0?fmt(tR)+' results':'','yellow')+
+    M('CPR Shopee',tCprShopee?'Rp '+fmt(tCprShopee):'-','Spend ÷ Klik Shopee','purple')+
     M('Klik Meta',fmt(tM),'CTR: '+(tM>0?(tSh/tM*100).toFixed(1):'-')+'%','')+
     M('Klik Shopee',fmt(tSh),'','')+
-    M('Order',fmt(tO),'CVR: '+(tSh>0?(tO/tSh*100).toFixed(1):'-')+'%','purple')+
-    M('Komisi','Rp '+fmt(tK),'','')+
+    M('Order',fmt(tO),'CVR: '+(tSh>0?(tO/tSh*100).toFixed(1):'-')+'%','')+
     M('ROAS',roas!==null?roas.toFixed(2)+'x':'-','',roas!==null?(roas>=1.5?'green':roas>=1?'yellow':'red'):'')+
+    M('Komisi','Rp '+fmt(tK),'','')+
     M('Net Profit','Rp '+fmt(tP),(tC>0?(tP/tC*100).toFixed(1)+'% ROI':''),tP>=0?'green':'red');
   // charts
   const lbls=rows.map(r=>r.dt.slice(5));
@@ -1737,8 +1783,9 @@ function renderModal(){
     return`<tr style="${bg}">
       <td style="white-space:nowrap;font-weight:500">${r.dt}</td>
       <td>${fmt(r.spend)}</td>
-      <td style=\"font-weight:600\">${fmt(r.tc)}</td>
+      <td style="font-weight:600">${fmt(r.tc)}</td>
       <td style="color:var(--text2)">${r.cpr!==null?'Rp '+fmt(r.cpr):'-'}</td>
+      <td>${cprShopeeB(r.cprShopee)}</td>
       <td>${fmt(r.mc)}</td><td>${fmt(r.sc)}</td><td>${ctrB(r.ctr)}</td>
       <td>${fmt(r.orders)}</td><td>${cvrB(r.cvr)}</td>
       <td>${fmt(r.komisi)}</td>${roasCell(r.roas)}
