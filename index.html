@@ -643,6 +643,12 @@ padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14p
   <div class="section-header">
     <div><div class="section-title">⏰ Analisis Jam Terbaik</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Jam berapa klik dan order paling banyak terjadi — bantu atur jadwal iklan Meta</div></div>
     <div style="display:flex;gap:8px;align-items:center">
+      <div class="date-presets">
+        <button class="date-preset" onclick="setHourlyPreset(1,this)">Kemarin</button>
+        <button class="date-preset" onclick="setHourlyPreset(3,this)">3 Hari</button>
+        <button class="date-preset active" onclick="setHourlyPreset(7,this)">7 Hari</button>
+        <button class="date-preset" onclick="setHourlyPreset(30,this)">30 Hari</button>
+      </div>
       <input type="date" id="hourly-from" onchange="renderHourlyPage()">
       <span style="color:var(--text2)">–</span>
       <input type="date" id="hourly-to" onchange="renderHourlyPage()">
@@ -666,6 +672,12 @@ padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14p
     <div><div class="section-title">📦 Top Produk per Tag</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Produk terlaris & komisi terbesar dari setiap tag Shopee</div></div>
   </div>
   <div class="prod-filter">
+    <div class="date-presets">
+      <button class="date-preset" onclick="setProductsPreset(1,this)">Kemarin</button>
+      <button class="date-preset" onclick="setProductsPreset(3,this)">3 Hari</button>
+      <button class="date-preset active" onclick="setProductsPreset(7,this)">7 Hari</button>
+      <button class="date-preset" onclick="setProductsPreset(30,this)">30 Hari</button>
+    </div>
     <select id="prod-tag" onchange="renderProductsPage()"><option value="">Semua Tag</option></select>
     <select id="prod-sort" onchange="renderProductsPage()">
       <option value="komisi">Urutkan: Komisi</option>
@@ -765,6 +777,16 @@ function ctrB(v){if(v===null||v===undefined)return'<span style="color:var(--text
 function roasB(v){if(v===null||v===undefined)return'-';const c=v>=1.5?'cvr-high':v>=1?'cvr-mid':'cvr-low';return`<span class="${c}" style="font-weight:600">${v.toFixed(2)}x</span>`;}
 function cprShopeeB(v){if(v===null||v===undefined)return'<span style="color:var(--text3)">-</span>';return`<span style="color:#f0abfc;font-weight:600">Rp ${fmt(Math.round(v))}</span>`;}
 function inRange(dt,from,to){const d=String(dt).slice(0,10);if(from&&d<from)return false;if(to&&d>to)return false;return true;}
+function localDateStr(d){
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+  return`${y}-${m}-${day}`;
+}
+function setRecentDateRange(days,fromId,toId){
+  const to=new Date();to.setHours(12,0,0,0);to.setDate(to.getDate()-1);
+  const from=new Date(to);from.setDate(from.getDate()-(days-1));
+  document.getElementById(fromId).value=localDateStr(from);
+  document.getElementById(toId).value=localDateStr(to);
+}
 
 // ============================================================
 // PPN
@@ -908,9 +930,20 @@ function renderAlertPage(){
 // JAM TERBAIK
 // ============================================================
 let chartHourlyClicks=null,chartHourlyOrders=null;
+function setHourlyPreset(days,el){
+  document.querySelectorAll('#page-hourly .date-preset').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  setRecentDateRange(days,'hourly-from','hourly-to');
+  renderHourlyPage();
+}
 function renderHourlyPage(){
-  const from=document.getElementById('hourly-from')?.value||null;
-  const to=document.getElementById('hourly-to')?.value||null;
+  let from=document.getElementById('hourly-from')?.value||null;
+  let to=document.getElementById('hourly-to')?.value||null;
+  if(!from&&!to){
+    setRecentDateRange(7,'hourly-from','hourly-to');
+    from=document.getElementById('hourly-from').value;
+    to=document.getElementById('hourly-to').value;
+  }
   if(!rawClicks.length&&!rawOrders.length){
     document.getElementById('hourly-summary').innerHTML='<p style="color:var(--text2)">Upload data terlebih dahulu.</p>';return;
   }
@@ -985,11 +1018,22 @@ function renderHourlyPage(){
 // ============================================================
 // TOP PRODUK PER TAG
 // ============================================================
+function setProductsPreset(days,el){
+  document.querySelectorAll('#page-products .date-preset').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  setRecentDateRange(days,'prod-from','prod-to');
+  renderProductsPage();
+}
 function renderProductsPage(){
   const selTag=document.getElementById('prod-tag')?.value||'';
   const sortBy=document.getElementById('prod-sort')?.value||'komisi';
-  const from=document.getElementById('prod-from')?.value||null;
-  const to=document.getElementById('prod-to')?.value||null;
+  let from=document.getElementById('prod-from')?.value||null;
+  let to=document.getElementById('prod-to')?.value||null;
+  if(!from&&!to){
+    setRecentDateRange(7,'prod-from','prod-to');
+    from=document.getElementById('prod-from').value;
+    to=document.getElementById('prod-to').value;
+  }
   const search=(document.getElementById('prod-search')?.value||'').toLowerCase();
 
   // Populate tag filter on first run
@@ -1079,8 +1123,8 @@ function normalizeMetaRow(row){
   // Fallback: jika 'Unique link clicks' tidak ada di CSV,
   // gunakan kolom 'Results' selama Result indicator = actions:link_click
   if(!out['link_clicks']||out['link_clicks']===''){
-    const indicator=(out['Result indicator']||out['Result indicator']||'').trim();
-    if(indicator==='actions:link_click'){
+    const indicator=String(out['result_indicator']||out['Result indicator']||out['Indikator Hasil']||'').trim().toLowerCase();
+    if(indicator==='actions:link_click'||indicator==='link_click'||indicator.includes('link click')||indicator.includes('klik tautan')){
       out['link_clicks']=out['results']||'0';
     }
   }
