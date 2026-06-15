@@ -441,7 +441,7 @@ padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14p
   <div class="card">
     <h3 style="font-size:13px;font-weight:600;margin-bottom:12px">Keterangan Kolom CSV</h3>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;font-size:12px;">
-      <div><div style="font-weight:600;margin-bottom:6px;color:var(--accent)">Meta Ads <span style="font-size:10px;background:#dcfce7;color:#15803d;padding:1px 6px;border-radius:99px">EN & ID</span></div><div style="color:var(--text2);line-height:1.9">• Campaign name / <em>Nama kampanye</em><br>• Amount spent (IDR) / <em>Jumlah yang dibelanjakan (IDR)</em><br>• Unique link clicks / <em>Klik tautan unik</em><br>• Results / <em>Hasil</em><br>• Reporting starts / <em>Tanggal mulai pelaporan</em></div></div>
+      <div><div style="font-weight:600;margin-bottom:6px;color:var(--accent)">Meta Ads <span style="font-size:10px;background:#dcfce7;color:#15803d;padding:1px 6px;border-radius:99px">EN & ID</span></div><div style="color:var(--text2);line-height:1.9">• Campaign name / <em>Nama kampanye</em><br>• Amount spent (IDR) / <em>Jumlah yang dibelanjakan (IDR)</em><br>• Unique link clicks / <em>Klik tautan unik</em> <span style="opacity:.6">(opsional*)</span><br>• Results / <em>Hasil</em> (dipakai jika klik tidak ada)<br>• Reporting starts / <em>Tanggal mulai pelaporan</em></div></div>
       <div><div style="font-weight:600;margin-bottom:6px;color:var(--accent)">Shopee Komisi</div><div style="color:var(--text2);line-height:1.9">• Tag_link1<br>• Komisi Bersih Affiliate (Rp)<br>• Status Pesanan<br>• Waktu Pemesanan<br>• Nilai Pembelian (Rp)</div></div>
       <div><div style="font-weight:600;margin-bottom:6px;color:var(--accent)">Shopee Klik</div><div style="color:var(--text2);line-height:1.9">• Tag_link<br>• Waktu Klik<br>• Wilayah Klik<br>• Perujuk</div></div>
     </div>
@@ -1076,6 +1076,14 @@ const META_COL_MAP={
 function normalizeMetaRow(row){
   const out={};
   Object.entries(row).forEach(([k,v])=>{const key=META_COL_MAP[k.trim()];out[key||k]=v;});
+  // Fallback: jika 'Unique link clicks' tidak ada di CSV,
+  // gunakan kolom 'Results' selama Result indicator = actions:link_click
+  if(!out['link_clicks']||out['link_clicks']===''){
+    const indicator=(out['Result indicator']||out['Result indicator']||'').trim();
+    if(indicator==='actions:link_click'){
+      out['link_clicks']=out['results']||'0';
+    }
+  }
   return out;
 }
 function detectMetaLang(headers){
